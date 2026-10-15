@@ -3,6 +3,7 @@ import { hasControlCharacters, normalizeSpaces } from '../common/text';
 import { PlayerCondition } from '../domain/market-value';
 import { Attributes, Position } from '../domain/player-value';
 import { CONDITIONS, POSITIONS } from '../domain/player-enums';
+import { asObject, Body } from '../common/body';
 
 export interface UpdatePlayerInput {
   name: string;
@@ -13,15 +14,6 @@ export interface UpdatePlayerInput {
 
 export interface CreatePlayerInput extends UpdatePlayerInput, Attributes {
   potential: number;
-}
-
-type Body = Record<string, unknown>;
-
-function asObject(body: unknown): Body {
-  if (body === null || typeof body !== 'object' || Array.isArray(body)) {
-    return fail('O corpo da requisição deve ser um objeto JSON.');
-  }
-  return body as Body;
 }
 
 function readInt(body: Body, field: string, min: number, max: number): number {

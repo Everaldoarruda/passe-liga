@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "clubes_nome_lower_key" ON "clubes" (lower("nome"));

@@ -1,5 +1,5 @@
-import { BadRequestException } from '@nestjs/common';
+import { ValidationError } from './validation-error';
 
 export function fail(message: string): never {
-  throw new BadRequestException(message);
+  throw new ValidationError(message);
 }

@@ -1,5 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@nestjs/common';
 import type { Response } from 'express';
+import { ValidationError } from './validation-error';
 
 interface ErrorBody {
   status: number;
@@ -17,6 +18,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
   }
 
   private describe(exception: unknown): ErrorBody {
+    if (exception instanceof ValidationError) {
+      return { status: 400, message: exception.message };
+    }
     if (exception instanceof HttpException) {
       return {
         status: exception.getStatus(),

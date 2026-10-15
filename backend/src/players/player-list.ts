@@ -1,15 +1,14 @@
-import { normalizeForComparison } from '../common/text';
+import { compareNames,normalizeForComparison } from '../common/text';
 import { toCents } from '../domain/money';
 import type { ListPlayersQuery, SortCriterion, SortField } from './list-players-query';
 import { POSITIONS } from '../domain/player-enums';
 import type { PlayerResponse } from './player.presenter';
 
-const compareText = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 
 function compareBy(field: SortField, a: PlayerResponse, b: PlayerResponse): number {
   switch (field) {
     case 'name':
-      return compareText(normalizeForComparison(a.name), normalizeForComparison(b.name));
+      return compareNames(a.name, b.name);
     case 'value':
       return a.market_value - b.market_value;
     case 'age':
@@ -20,7 +19,7 @@ function compareBy(field: SortField, a: PlayerResponse, b: PlayerResponse): numb
 }
 
 // Critérios pedidos, depois nome e, por fim, id crescente (RN07)
-function byCriteria(criteria: SortCriterion[]) {
+export function byCriteria(criteria: SortCriterion[]) {
   const all: SortCriterion[] = [...criteria, { field: 'name', descending: false }];
   return (a: PlayerResponse, b: PlayerResponse): number => {
     for (const { field, descending } of all) {
