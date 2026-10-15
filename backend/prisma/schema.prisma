@@ -21,6 +21,31 @@ model Clube {
   caixa    Decimal  @default(300.00) @db.Decimal(10, 2)
   formacao String?  @db.VarChar(5)
   criadoEm DateTime @default(now()) @map("criado_em")
+  jogadores Jogador[]
 
   @@map("clubes")
+}
+
+model Jogador {
+  id           Int       @id @default(autoincrement())
+  nome         String    @db.VarChar(100)
+  posicao      String    @db.VarChar(3)
+  agilidade    Int
+  idade        Int
+  valorBase    Decimal   @map("valor_base") @db.Decimal(6, 2)
+  condicao     String    @default("APTO") @db.VarChar(20)
+  clubeId      Int?      @map("clube_id")
+  clube        Clube?    @relation(fields: [clubeId], references: [id])
+  velocidade   Int
+  finalizacao  Int
+  passe        Int
+  drible       Int
+  defesa       Int
+  fisico       Int
+  potencial    Int
+  excluidoEm   DateTime? @map("excluido_em")
+  criadoEm     DateTime  @default(now()) @map("criado_em")
+  atualizadoEm DateTime  @updatedAt @map("atualizado_em")
+
+  @@map("jogadores")
 }

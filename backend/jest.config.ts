@@ -14,6 +14,8 @@ const config: Config = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
   testRegex: '.*\\.spec\\.ts$',
+  // NestJS 12 is ESM-only and Jest can't require() ESM before Node 24.9.
+  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/src/app.controller.spec.ts'],
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
