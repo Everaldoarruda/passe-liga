@@ -35,3 +35,4 @@ export function toPlayerResponse(row: Jogador) {
     club_id: row.clubeId,
   };
 }
+export type PlayerResponse = ReturnType<typeof toPlayerResponse>;

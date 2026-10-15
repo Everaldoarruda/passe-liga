@@ -1,4 +1,6 @@
-import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
+import {
+  Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put, Query, Res,
+} from '@nestjs/common';
 import type { Response } from 'express';
 import { parseId } from '../common/parse-id';
 import { PlayersService } from './players.service';
@@ -14,8 +16,29 @@ export class PlayersController {
     return player;
   }
 
+  @Get()
+  list(@Query() query: Record<string, unknown>) {
+    return this.players.list(query);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.players.findOne(parseId(id));
+  }
+
+  @Put(':id')
+  update(@Param('id') id: string, @Body() body: unknown) {
+    return this.players.update(parseId(id), body);
+  }
+
+  @Patch(':id/condition')
+  changeCondition(@Param('id') id: string, @Body() body: unknown) {
+    return this.players.changeCondition(parseId(id), body);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  async remove(@Param('id') id: string): Promise<void> {
+    await this.players.remove(parseId(id));
   }
 }

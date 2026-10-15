@@ -1,21 +1,21 @@
-import { BadRequestException } from '@nestjs/common';
+import { fail } from '../common/fail';
+import { hasControlCharacters, normalizeSpaces } from '../common/text';
+import { PlayerCondition } from '../domain/market-value';
 import { Attributes, Position } from '../domain/player-value';
+import { CONDITIONS, POSITIONS } from '../domain/player-enums';
 
-export const POSITIONS: readonly Position[] = ['GOL', 'ZAG', 'LAT', 'MEI', 'ATA'];
-
-export interface CreatePlayerInput extends Attributes {
+export interface UpdatePlayerInput {
   name: string;
   position: Position;
   agility: number;
   age: number;
+}
+
+export interface CreatePlayerInput extends UpdatePlayerInput, Attributes {
   potential: number;
 }
 
 type Body = Record<string, unknown>;
-
-const fail = (message: string): never => {
-  throw new BadRequestException(message);
-};
 
 function asObject(body: unknown): Body {
   if (body === null || typeof body !== 'object' || Array.isArray(body)) {
@@ -38,8 +38,8 @@ function readName(body: Body): string {
   const raw = body.name;
   if (raw === undefined || raw === null) return fail('O campo name é obrigatório.');
   if (typeof raw !== 'string') return fail('O campo name deve ser um texto.');
-  if (/\p{Cc}/u.test(raw)) return fail('O campo name não pode ter caracteres de controle.');
-  const name = raw.replace(/ {2,}/g, ' ').replace(/^ | $/g, '');
+  if (hasControlCharacters(raw)) return fail('O campo name não pode ter caracteres de controle.');
+  const name = normalizeSpaces(raw);
   if (name === '') return fail('O campo name é obrigatório.');
   const length = [...name].length;
   if (length < 3 || length > 100) return fail('O campo name deve ter de 3 a 100 caracteres.');
@@ -58,13 +58,18 @@ function readPosition(body: Body): Position {
   return value as Position;
 }
 
-export function parseCreatePlayer(raw: unknown): CreatePlayerInput {
-  const body = asObject(raw);
+function readBasicData(body: Body): UpdatePlayerInput {
   const name = readName(body);
   const position = readPosition(body);
   const age = readInt(body, 'age', 16, 45);
   const agility = readInt(body, 'agility', 1, 100);
   if (age >= 35 && agility > 85) fail('Com 35 anos ou mais, a agilidade é no máximo 85.');
+  return { name, position, age, agility };
+}
+
+export function parseCreatePlayer(raw: unknown): CreatePlayerInput {
+  const body = asObject(raw);
+  const basic = readBasicData(body);
 
   const attributes: Attributes = {
     pace: readInt(body, 'pace', 1, 99),
@@ -82,9 +87,22 @@ export function parseCreatePlayer(raw: unknown): CreatePlayerInput {
   const highest = Math.max(...values);
   const potential = readInt(body, 'potential', 1, 99);
   if (potential < highest) fail('O potential não pode ser menor que o maior atributo.');
-  if (age >= 33 && potential !== highest) {
+  if (basic.age >= 33 && potential !== highest) {
     fail('Com 33 anos ou mais, o potential deve ser igual ao maior atributo.');
   }
 
-  return { name, position, age, agility, potential, ...attributes };
+  return { ...basic, potential, ...attributes };
+}
+
+export function parseUpdatePlayer(raw: unknown): UpdatePlayerInput {
+  return readBasicData(asObject(raw));
+}
+
+export function parseCondition(raw: unknown): PlayerCondition {
+  const value = asObject(raw).condition;
+  if (value === undefined || value === null) return fail('O campo condition é obrigatório.');
+  if (typeof value !== 'string' || !CONDITIONS.includes(value as PlayerCondition)) {
+    return fail('O campo condition deve ser APTO, MAL_CONDICIONADO ou DOENTE.');
+  }
+  return value as PlayerCondition;
 }
