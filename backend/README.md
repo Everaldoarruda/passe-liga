@@ -13,6 +13,7 @@ O modelo está em [`.env.example`](.env.example). Copie-o para `.env` (`cp .env.
 | `DATABASE_URL` | Conexão com o PostgreSQL, usada pelo Prisma | `postgresql://passe:passe@localhost:5432/passe` |
 | `PORT` | Porta da API | `3000` |
 | `FRONTEND_ORIGIN` | Única origem liberada no CORS | `http://localhost:5173` |
+| `TEST_DATABASE_URL` | Banco separado usado só pelos testes de ponta a ponta (apagado a cada execução) | `postgresql://passe:passe@localhost:5432/passe_test` |
 
 ## Comandos
 
@@ -23,14 +24,15 @@ Todos rodam na pasta `backend`.
 | `npm run build` | Compila para `dist/` |
 | `npm run start:prod` | Sobe a API compilada |
 | `npm run start:dev` | Sobe a API em modo de desenvolvimento, recompilando a cada mudança |
-| `npm test` | Roda os testes automatizados e termina sozinho |
+| `npm test` | Roda os testes unitários e termina sozinho |
+| `npm run test:e2e` | Compila a API e roda os testes de ponta a ponta contra ela, no banco `TEST_DATABASE_URL` (precisa do banco no ar) |
 | `npm run lint` | Verifica o código com o oxlint |
 | `npm run format:check` | Verifica a formatação com o Prettier, sem alterar arquivos |
 | `npm run format` | Corrige a formatação |
 
 ## Diferenciais
 
-- **Testes automatizados:** `npm test` roda os testes do domínio e das validações de entrada, termina sozinho (sem modo de observação) e inclui os exemplos das tabelas do enunciado, entre eles o cálculo do valor de mercado (RN02 a RN05) em `src/domain/market-value.spec.ts`.
+- **Testes automatizados:** `npm test` roda os testes do domínio e das validações de entrada, termina sozinho (sem modo de observação) e inclui os exemplos das tabelas do enunciado, entre eles o cálculo do valor de mercado (RN02 a RN05) em `src/domain/market-value.spec.ts`. Além deles, `npm run test:e2e` percorre o roteiro da API na ordem do barema (B01 a B22): sobe a API compilada sobre um banco de teste vazio e confere, por HTTP, os códigos, os corpos, os cabeçalhos e que nada é gravado nas recusas.
 - **Documentação interativa (Swagger/OpenAPI):** com a API no ar, abra **http://localhost:3000/api/docs**. Todos os endpoints do enunciado aparecem com exemplos de corpo e de query params prontos para enviar.
 - **Log de cada requisição:** com a API no ar, cada requisição gera uma linha na saída da aplicação, pelo `Logger` do NestJS, com data e hora, método, caminho e status:
   ```
@@ -57,6 +59,10 @@ backend/
     ├── market/           # compra, venda, histórico de transações e exportação CSV
     ├── league/           # escalação, partidas e classificação
     └── prisma/           # PrismaService (conexão com o banco)
+test/
+├── roteiro.e2e-spec.ts   # testes de ponta a ponta, na ordem do roteiro do barema
+├── api.ts                # cliente HTTP dos testes
+└── global-setup.ts       # prepara o banco de teste e sobe a API (global-teardown.ts a encerra)
 ```
 
 Cada módulo separa as camadas: o **controller** só recebe o pedido e chama o serviço; o **service** valida a entrada, acessa o banco e chama o domínio; o **presenter** monta a resposta. Os cálculos ficam em `domain/`, cada um em um só lugar, com testes ao lado (`*.spec.ts`).
@@ -82,7 +88,6 @@ Cada módulo separa as camadas: o **controller** só recebe o pedido e chama o s
 | `@nestjs/cli`, `@nestjs/schematics` | Build e execução pela CLI do NestJS |
 | `jest`, `ts-jest`, `@types/jest` | Testes automatizados em TypeScript |
 | `ts-node` | Permite ao Jest ler a configuração em TypeScript (`jest.config.ts`) |
-| `@nestjs/testing`, `supertest`, `@types/supertest` | Testes de ponta a ponta dos endpoints (pasta `test/`) |
 | `tsconfig-paths` | Usada pelo script `test:debug` |
 | `oxlint`, `oxlint-tsgolint` | Lint, com regras que usam os tipos do TypeScript |
 | `prettier` | Formatação do código |

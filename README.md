@@ -75,6 +75,7 @@ Os arquivos de trava das dependências (`backend/package-lock.json`) estão vers
   - **Refatoração para remover duplicação e código morto:** leitores de entrada em `common/body.ts`, validação de id em `common/limits.ts`, uso único do `lockClub` e remoção do "Hello World" do projeto inicial.
   - **Configuração:** carregamento do `.env` com `dotenv`, Prettier com o script `format:check`, `postinstall` com `prisma generate` e healthcheck do banco no `docker-compose.yml`.
   - **Diferenciais:** middleware de log das requisições (`common/request-logger.ts`) e documentação Swagger (`common/api-docs.ts` e os arquivos `*.docs.ts`).
+  - **Testes de ponta a ponta** (`backend/test/`): escrita do roteiro da API na ordem do barema. Conferi que a suíte falha quando uma regra é quebrada de propósito (mudando o teto da multa).
   - **Este README:** os passos foram testados num clone limpo do repositório.
 - **Por quê:** acelerar a revisão das regras, que são muitas e detalhadas, e encontrar problemas de entrega, como o cliente do Prisma que não era gerado numa instalação limpa.
 - **O que aceitei, alterei ou descartei:**
