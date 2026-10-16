@@ -1,6 +1,4 @@
-import {
-  Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put, Query, Res,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put, Query, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { parseId } from '../common/parse-id';
 import { PlayersService } from './players.service';

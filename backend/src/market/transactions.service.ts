@@ -3,9 +3,7 @@ import type { Prisma } from '@prisma/client';
 import { summarizeTransactions } from '../domain/transaction-summary';
 import { buildTransactionsCsv } from '../domain/transactions-csv';
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  toSummaryResponse, toTransactionResponse, toTransactionRow,
-} from './transaction.presenter';
+import { toSummaryResponse, toTransactionResponse, toTransactionRow } from './transaction.presenter';
 import { parseTransactionsQuery } from './transactions-query';
 
 @Injectable()

@@ -18,7 +18,11 @@ describe('buildStandings (RN21)', () => {
 
   it('reproduz a classificação do enunciado, com os clubes que não jogaram zerados', () => {
     const rows = buildStandings(clubs, matches).map((r) => [
-      r.position, r.clubName, r.points, r.goalDifference, r.goalsFor,
+      r.position,
+      r.clubName,
+      r.points,
+      r.goalDifference,
+      r.goalsFor,
     ]);
     expect(rows).toEqual([
       [1, 'Gama SC', 6, 2, 3],
@@ -32,7 +36,10 @@ describe('buildStandings (RN21)', () => {
 
   it('desempata pelo id quando os nomes são iguais na comparação', () => {
     const rows = buildStandings(
-      [{ id: 2, name: 'Aguias FC' }, { id: 1, name: 'Águias FC' }],
+      [
+        { id: 2, name: 'Aguias FC' },
+        { id: 1, name: 'Águias FC' },
+      ],
       [],
     );
     expect(rows.map((r) => r.clubId)).toEqual([1, 2]);

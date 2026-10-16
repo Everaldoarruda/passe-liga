@@ -34,7 +34,12 @@ export function readCleanText(body: Body, field: string, min: number, max: numbe
   return text;
 }
 
-export function readChoice<T extends string>(body: Body, field: string, allowed: readonly T[], message: string): T {
+export function readChoice<T extends string>(
+  body: Body,
+  field: string,
+  allowed: readonly T[],
+  message: string,
+): T {
   const value = readRequired(body, field);
   if (typeof value !== 'string' || !allowed.includes(value as T)) return fail(message);
   return value as T;

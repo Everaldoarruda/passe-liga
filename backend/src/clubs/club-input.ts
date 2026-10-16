@@ -33,7 +33,9 @@ function readAcronym(body: Body, name: string): string {
   }
   if (new Set(raw).size === 1) return fail('A sigla não pode ter as três letras iguais.');
 
-  const letters = normalizeForComparison(name).replace(/[^a-z]/g, '').toUpperCase();
+  const letters = normalizeForComparison(name)
+    .replace(/[^a-z]/g, '')
+    .toUpperCase();
   if (raw[0] !== letters[0]) {
     return fail('A primeira letra da sigla deve ser a primeira letra do nome do clube.');
   }

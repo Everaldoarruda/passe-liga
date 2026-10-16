@@ -1,6 +1,11 @@
 import {
-  commissionCents, isWithinCashLimit, MS_PER_DAY, penaltyRate, purchaseFeeCents,
-  remainingDays, settleSale,
+  commissionCents,
+  isWithinCashLimit,
+  MS_PER_DAY,
+  penaltyRate,
+  purchaseFeeCents,
+  remainingDays,
+  settleSale,
 } from './trade';
 
 describe('purchaseFeeCents (RN13)', () => {
@@ -29,8 +34,7 @@ describe('isWithinCashLimit (RN13)', () => {
 
 describe('remainingDays (RN15)', () => {
   const now = new Date('2026-11-05T19:40:00Z');
-  const after = (days: number, minutes = 0) =>
-    new Date(now.getTime() + days * MS_PER_DAY + minutes * 60_000);
+  const after = (days: number, minutes = 0) => new Date(now.getTime() + days * MS_PER_DAY + minutes * 60_000);
 
   it.each([
     ['já passou', after(-3), 0],
@@ -51,12 +55,17 @@ describe('remainingDays (RN15)', () => {
 });
 
 describe('penaltyRate (RN15)', () => {
-  it.each([[0, 0], [1, 5], [30, 5], [31, 10], [180, 10], [181, 20], [200, 20]])(
-    '%i dias => %i%%',
-    (days, expected) => {
-      expect(penaltyRate(days)).toBe(expected);
-    },
-  );
+  it.each([
+    [0, 0],
+    [1, 5],
+    [30, 5],
+    [31, 10],
+    [180, 10],
+    [181, 20],
+    [200, 20],
+  ])('%i dias => %i%%', (days, expected) => {
+    expect(penaltyRate(days)).toBe(expected);
+  });
 });
 
 describe('commissionCents (RN16)', () => {

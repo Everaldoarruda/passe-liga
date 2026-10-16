@@ -19,7 +19,11 @@ export class LineupService {
       where: { clubeId: clubId },
       include: { jogador: true },
     });
-    return toLineupResponse(club.id, club.formacao, rows.map((row) => row.jogador));
+    return toLineupResponse(
+      club.id,
+      club.formacao,
+      rows.map((row) => row.jogador),
+    );
   }
 
   async replace(clubId: number, body: unknown) {

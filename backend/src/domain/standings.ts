@@ -48,7 +48,17 @@ export function buildStandings(clubs: StandingClub[], matches: PlayedMatch[]): S
   const tallies = new Map<number, Tally>(
     clubs.map((club): [number, Tally] => [
       club.id,
-      { clubId: club.id, clubName: club.name, played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, points: 0 },
+      {
+        clubId: club.id,
+        clubName: club.name,
+        played: 0,
+        wins: 0,
+        draws: 0,
+        losses: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        points: 0,
+      },
     ]),
   );
 

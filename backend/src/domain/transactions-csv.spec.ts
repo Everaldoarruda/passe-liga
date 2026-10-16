@@ -4,8 +4,14 @@ import { buildTransactionsCsv } from './transactions-csv';
 const HEADER = 'data_hora;tipo;jogador;valor;taxa_ou_comissao;multa;lucro;variacao_caixa';
 
 const base: TransactionRow = {
-  createdAt: new Date('2026-11-05T19:40:00Z'), type: 'VENDA', playerName: 'Meia Lua',
-  valueCents: 4000, feeCents: 30, penaltyCents: 400, profitCents: 300, cashChangeCents: 3570,
+  createdAt: new Date('2026-11-05T19:40:00Z'),
+  type: 'VENDA',
+  playerName: 'Meia Lua',
+  valueCents: 4000,
+  feeCents: 30,
+  penaltyCents: 400,
+  profitCents: 300,
+  cashChangeCents: 3570,
 };
 
 describe('buildTransactionsCsv (RN18)', () => {
@@ -15,8 +21,14 @@ describe('buildTransactionsCsv (RN18)', () => {
 
   it('reproduz o exemplo do enunciado', () => {
     const purchase: TransactionRow = {
-      createdAt: new Date('2026-11-02T13:15:00Z'), type: 'COMPRA', playerName: 'Meia Lua',
-      valueCents: 3700, feeCents: 185, penaltyCents: 0, profitCents: null, cashChangeCents: -3885,
+      createdAt: new Date('2026-11-02T13:15:00Z'),
+      type: 'COMPRA',
+      playerName: 'Meia Lua',
+      valueCents: 3700,
+      feeCents: 185,
+      penaltyCents: 0,
+      profitCents: null,
+      cashChangeCents: -3885,
     };
     expect(buildTransactionsCsv([base, purchase])).toBe(
       `${HEADER}\n` +

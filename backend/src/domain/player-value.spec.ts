@@ -1,8 +1,12 @@
 import { Attributes, baseValueCents, overall, Position } from './player-value';
 
 const attrs = (
-  pace: number, shooting: number, passing: number,
-  dribbling: number, defending: number, physical: number,
+  pace: number,
+  shooting: number,
+  passing: number,
+  dribbling: number,
+  defending: number,
+  physical: number,
 ): Attributes => ({ pace, shooting, passing, dribbling, defending, physical });
 
 describe('overall (RN06)', () => {

@@ -15,10 +15,7 @@ describe('marketValueCents (RN02 a RN05)', () => {
     [100, 'MAL_CONDICIONADO', 50, 35, 100],
   ];
 
-  it.each(cases)(
-    'base %i, %s, agilidade %i, idade %i => %i',
-    (base, condition, agility, age, expected) => {
-      expect(marketValueCents(base, condition, agility, age)).toBe(expected);
-    },
-  );
+  it.each(cases)('base %i, %s, agilidade %i, idade %i => %i', (base, condition, agility, age, expected) => {
+    expect(marketValueCents(base, condition, agility, age)).toBe(expected);
+  });
 });

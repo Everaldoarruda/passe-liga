@@ -20,7 +20,12 @@ function readPlayerIds(body: Body): number[] {
 export function parseLineup(raw: unknown): LineupInput {
   const body = asObject(raw);
   return {
-    formation: readChoice(body, 'formation', FORMATIONS, 'O campo formation deve ser 3-1, 2-2, 2-1-1 ou 1-2-1.'),
+    formation: readChoice(
+      body,
+      'formation',
+      FORMATIONS,
+      'O campo formation deve ser 3-1, 2-2, 2-1-1 ou 1-2-1.',
+    ),
     playerIds: readPlayerIds(body),
   };
 }

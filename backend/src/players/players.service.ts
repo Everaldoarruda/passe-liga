@@ -8,7 +8,6 @@ import { parseCondition, parseCreatePlayer, parseUpdatePlayer } from './player-i
 import { toPlayerResponse } from './player.presenter';
 import { lockClub } from '../common/club-lock';
 
-
 function clubFilter(query: ListPlayersQuery): number | null | { not: null } | undefined {
   if (query.clubId !== undefined) return query.clubId;
   if (query.free === undefined) return undefined;
@@ -102,7 +101,7 @@ export class PlayersService {
     }
     if (current.condicao === condition) return toPlayerResponse(current);
 
-       const row = await this.prisma.$transaction(async (tx) => {
+    const row = await this.prisma.$transaction(async (tx) => {
       if (current.clubeId !== null) await lockClub(tx, current.clubeId);
       if (condition === 'DOENTE') await tx.escalacao.deleteMany({ where: { jogadorId: id } });
       return tx.jogador.update({ where: { id }, data: { condicao: condition } });

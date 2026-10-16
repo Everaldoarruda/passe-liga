@@ -4,7 +4,6 @@ import type { PlayerResponse } from '../players/player.presenter';
 import { formatBrasilia } from '../domain/brasilia-date';
 import { penaltyRate, remainingDays } from '../domain/trade';
 
-
 export type ClubWithPlayers = Clube & { jogadores: Jogador[] };
 
 export function toClubSummary(club: Clube, players: PlayerResponse[]) {

@@ -7,20 +7,22 @@ describe('sortClubs (RN11)', () => {
   const clubs = [club(1, 'Gama SC', 300), club(2, 'Épsilon EC', 300), club(3, 'Delta FC', 310)];
 
   it('ordena por nome sem acento', () => {
-    expect(sortClubs(clubs, 'name').map((c) => c.name)).toEqual([
-      'Delta FC', 'Épsilon EC', 'Gama SC',
-    ]);
+    expect(sortClubs(clubs, 'name').map((c) => c.name)).toEqual(['Delta FC', 'Épsilon EC', 'Gama SC']);
   });
 
   it('ordena por patrimônio decrescente e desempata pelo nome', () => {
     expect(sortClubs(clubs, 'net_worth_desc').map((c) => c.name)).toEqual([
-      'Delta FC', 'Épsilon EC', 'Gama SC',
+      'Delta FC',
+      'Épsilon EC',
+      'Gama SC',
     ]);
   });
 
   it('ordena por patrimônio crescente e desempata pelo nome', () => {
     expect(sortClubs(clubs, 'net_worth_asc').map((c) => c.name)).toEqual([
-      'Épsilon EC', 'Gama SC', 'Delta FC',
+      'Épsilon EC',
+      'Gama SC',
+      'Delta FC',
     ]);
   });
 });

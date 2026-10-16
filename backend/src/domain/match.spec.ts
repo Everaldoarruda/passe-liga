@@ -57,7 +57,12 @@ describe('playMatch (RN20)', () => {
 
   it('monta os 6 duelos na ordem e com os valores do enunciado', () => {
     const rows = playMatch(eagles, delta).duels.map((d) => [
-      d.order, d.attacker.playerName, d.attacker.value, d.defender.playerName, d.defender.value, d.goal,
+      d.order,
+      d.attacker.playerName,
+      d.attacker.value,
+      d.defender.playerName,
+      d.defender.value,
+      d.goal,
     ]);
     expect(rows).toEqual([
       [1, 'Otto Rangel', 75, 'Ivo Teles', 72, true],

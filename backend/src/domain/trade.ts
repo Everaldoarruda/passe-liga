@@ -45,11 +45,7 @@ export interface SaleSettlement {
   creditCents: number;
 }
 
-export function settleSale(
-  valueCents: number,
-  purchaseCents: number,
-  daysRemaining: number,
-): SaleSettlement {
+export function settleSale(valueCents: number, purchaseCents: number, daysRemaining: number): SaleSettlement {
   const rate = penaltyRate(daysRemaining);
   const penalty = Math.min(divideRounded(valueCents * rate, 100), MAX_PENALTY_CENTS);
   const profit = valueCents - purchaseCents;

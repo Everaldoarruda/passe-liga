@@ -1,4 +1,4 @@
-import type { Jogador} from '@prisma/client';
+import type { Jogador } from '@prisma/client';
 import { fromCents, toCents } from '../domain/money';
 import { marketValueCents, PlayerCondition } from '../domain/market-value';
 import { overall, Position } from '../domain/player-value';

@@ -7,7 +7,6 @@ import { parseClubSort, sortClubs } from './club-list';
 import { parseCreateClub } from './club-input';
 import { ClubWithPlayers, toClubSummary, toContract } from './club.presenter';
 
-
 const MAX_CLUBS = 20;
 const WITH_PLAYERS = { jogadores: { where: { excluidoEm: null } } };
 const WITH_PLAYERS_AND_CONTRACTS = {
@@ -16,7 +15,6 @@ const WITH_PLAYERS_AND_CONTRACTS = {
     include: { contratos: { where: { situacao: 'ATIVO' } } },
   },
 } satisfies Prisma.ClubeInclude;
-
 
 @Injectable()
 export class ClubsService {
@@ -62,7 +60,10 @@ export class ClubsService {
   async list(rawQuery: Record<string, unknown>) {
     const sort = parseClubSort(rawQuery);
     const clubs = await this.prisma.clube.findMany({ include: WITH_PLAYERS });
-    return sortClubs(clubs.map((club) => this.summarize(club)), sort);
+    return sortClubs(
+      clubs.map((club) => this.summarize(club)),
+      sort,
+    );
   }
 
   private summarize(club: ClubWithPlayers) {

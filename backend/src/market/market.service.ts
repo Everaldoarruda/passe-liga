@@ -139,7 +139,7 @@ export class MarketService {
         data: { clubeId: null },
       });
       if (released.count !== 1) throw new ConflictException('O jogador mudou de clube.');
-         await tx.escalacao.deleteMany({ where: { jogadorId: player.id } });
+      await tx.escalacao.deleteMany({ where: { jogadorId: player.id } });
 
       const newCashCents = centsOf(club.caixa) + sale.creditCents;
       await tx.clube.update({ where: { id: clubId }, data: { caixa: fromCents(newCashCents) } });

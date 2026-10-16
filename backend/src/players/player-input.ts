@@ -34,7 +34,12 @@ function readName(body: Body): string {
 
 function readBasicData(body: Body): UpdatePlayerInput {
   const name = readName(body);
-  const position = readChoice(body, 'position', POSITIONS, 'O campo position deve ser GOL, ZAG, LAT, MEI ou ATA.');
+  const position = readChoice(
+    body,
+    'position',
+    POSITIONS,
+    'O campo position deve ser GOL, ZAG, LAT, MEI ou ATA.',
+  );
   const age = readInt(body, 'age', 16, 45);
   const agility = readInt(body, 'agility', 1, 100);
   if (age >= 35 && agility > 85) fail('Com 35 anos ou mais, a agilidade é no máximo 85.');

@@ -1,9 +1,8 @@
-import { compareNames,normalizeForComparison } from '../common/text';
+import { compareNames, normalizeForComparison } from '../common/text';
 import { toCents } from '../domain/money';
 import type { ListPlayersQuery, SortCriterion, SortField } from './list-players-query';
 import { POSITIONS } from '../domain/player-enums';
 import type { PlayerResponse } from './player.presenter';
-
 
 function compareBy(field: SortField, a: PlayerResponse, b: PlayerResponse): number {
   switch (field) {
