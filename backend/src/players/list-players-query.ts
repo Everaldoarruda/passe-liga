@@ -1,6 +1,7 @@
 import { fail } from '../common/fail';
+import { Query, readParam } from '../common/query';
 import { MAX_ID } from '../common/limits';
-import { hasControlCharacters, normalizeSpaces } from '../common/text';
+import { countCharacters, hasControlCharacters, normalizeSpaces } from '../common/text';
 import { PlayerCondition } from '../domain/market-value';
 import { Position } from '../domain/player-value';
 import { CONDITIONS, POSITIONS } from '../domain/player-enums';
@@ -27,8 +28,6 @@ export interface ListPlayersQuery {
   limit: number;
 }
 
-type Query = Record<string, unknown>;
-
 const MAX_VALUE_CENTS = 55000;
 
 const SORT_OPTIONS = new Map<string, SortCriterion>([
@@ -40,23 +39,15 @@ const SORT_OPTIONS = new Map<string, SortCriterion>([
   ['position', { field: 'position', descending: false }],
 ]);
 
-// Parâmetro ausente devolve undefined; presente e vazio (ou repetido) é 400
-function read(query: Query, name: string): string | undefined {
-  const value = query[name];
-  if (value === undefined) return undefined;
-  if (typeof value !== 'string' || value === '') return fail(`O parâmetro ${name} é inválido.`);
-  return value;
-}
-
 function readEnum<T extends string>(query: Query, name: string, allowed: readonly T[]): T | undefined {
-  const raw = read(query, name);
+  const raw = readParam(query, name);
   if (raw === undefined) return undefined;
   if (!allowed.includes(raw as T)) return fail(`O parâmetro ${name} tem um valor inválido.`);
   return raw as T;
 }
 
 function readInteger(query: Query, name: string, min: number, max: number): number | undefined {
-  const raw = read(query, name);
+  const raw = readParam(query, name);
   if (raw === undefined) return undefined;
   const value = Number(raw);
   if (!/^[1-9][0-9]*$/.test(raw) || value < min || value > max) {
@@ -66,7 +57,7 @@ function readInteger(query: Query, name: string, min: number, max: number): numb
 }
 
 function readMoneyInCents(query: Query, name: string): number | undefined {
-  const raw = read(query, name);
+  const raw = readParam(query, name);
   if (raw === undefined) return undefined;
   if (!/^(0|[1-9][0-9]*)(\.[0-9]{1,2})?$/.test(raw)) {
     return fail(`O parâmetro ${name} deve ser um decimal como 10, 10.5 ou 10.55.`);
@@ -77,17 +68,17 @@ function readMoneyInCents(query: Query, name: string): number | undefined {
 }
 
 function readSearch(query: Query): string | undefined {
-  const raw = read(query, 'search');
+  const raw = readParam(query, 'search');
   if (raw === undefined) return undefined;
   if (hasControlCharacters(raw)) return fail('O parâmetro search não pode ter caracteres de controle.');
   const text = normalizeSpaces(raw);
-  const length = [...text].length;
+  const length = countCharacters(text);
   if (length < 2 || length > 100) return fail('O parâmetro search deve ter de 2 a 100 caracteres.');
   return text;
 }
 
 function readSort(query: Query): SortCriterion[] {
-  const raw = read(query, 'sort');
+  const raw = readParam(query, 'sort');
   if (raw === undefined) return [{ field: 'name', descending: false }];
   const parts = raw.split(',');
   if (parts.length > 2) return fail('O parâmetro sort aceita no máximo dois critérios.');

@@ -4,10 +4,9 @@ import { formatBrasilia } from '../domain/brasilia-date';
 import { marketValueCents, PlayerCondition } from '../domain/market-value';
 import { formatMoney, fromCents, toCents } from '../domain/money';
 import { isWithinCashLimit, purchaseFeeCents, remainingDays, settleSale } from '../domain/trade';
+import { lockClub } from '../common/club-lock';
 import { PrismaService } from '../prisma/prisma.service';
 import { parseBuy } from './buy-input';
-
-type Tx = Prisma.TransactionClient;
 
 const SQUAD_LIMIT = 12;
 
@@ -32,7 +31,7 @@ export class MarketService {
     return this.prisma.$transaction(async (tx) => {
       const player = await tx.jogador.findFirst({ where: { id: playerId, excluidoEm: null } });
       if (!player) throw new NotFoundException('Jogador não encontrado.');
-      await this.lockClub(tx, input.clubId);
+      await lockClub(tx, input.clubId);
       const club = await tx.clube.findUniqueOrThrow({ where: { id: input.clubId } });
 
       if (player.clubeId !== null) throw new ConflictException('O jogador não está livre.');
@@ -122,7 +121,7 @@ export class MarketService {
         throw new ConflictException('Jogador livre não pode ser vendido.');
       }
       const clubId = player.clubeId;
-      await this.lockClub(tx, clubId);
+      await lockClub(tx, clubId);
       const club = await tx.clube.findUniqueOrThrow({ where: { id: clubId } });
 
       const contract = await tx.contrato.findFirst({
@@ -183,11 +182,5 @@ export class MarketService {
         club_cash: fromCents(newCashCents),
       };
     });
-  }
-
-  // Serializa as operações do mesmo clube (impede dois gastos simultâneos do mesmo caixa)
-  private async lockClub(tx: Tx, clubId: number): Promise<void> {
-    const rows = await tx.$queryRaw<{ id: number }[]>`SELECT id FROM clubes WHERE id = ${clubId} FOR UPDATE`;
-    if (rows.length === 0) throw new NotFoundException('Clube não encontrado.');
   }
 }

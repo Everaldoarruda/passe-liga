@@ -1,9 +1,8 @@
 import { fail } from '../common/fail';
-import { hasControlCharacters, normalizeSpaces } from '../common/text';
 import { PlayerCondition } from '../domain/market-value';
 import { Attributes, Position } from '../domain/player-value';
 import { CONDITIONS, POSITIONS } from '../domain/player-enums';
-import { asObject, Body } from '../common/body';
+import { asObject, Body, readChoice, readCleanText, readRequired } from '../common/body';
 
 export interface UpdatePlayerInput {
   name: string;
@@ -17,8 +16,7 @@ export interface CreatePlayerInput extends UpdatePlayerInput, Attributes {
 }
 
 function readInt(body: Body, field: string, min: number, max: number): number {
-  const value = body[field];
-  if (value === undefined || value === null) return fail(`O campo ${field} é obrigatório.`);
+  const value = readRequired(body, field);
   if (typeof value !== 'number' || !Number.isInteger(value)) {
     return fail(`O campo ${field} deve ser um número inteiro.`);
   }
@@ -27,32 +25,16 @@ function readInt(body: Body, field: string, min: number, max: number): number {
 }
 
 function readName(body: Body): string {
-  const raw = body.name;
-  if (raw === undefined || raw === null) return fail('O campo name é obrigatório.');
-  if (typeof raw !== 'string') return fail('O campo name deve ser um texto.');
-  if (hasControlCharacters(raw)) return fail('O campo name não pode ter caracteres de controle.');
-  const name = normalizeSpaces(raw);
-  if (name === '') return fail('O campo name é obrigatório.');
-  const length = [...name].length;
-  if (length < 3 || length > 100) return fail('O campo name deve ter de 3 a 100 caracteres.');
+  const name = readCleanText(body, 'name', 3, 100);
   if (/[0-9]/.test(name)) return fail('O campo name não pode ter dígitos.');
   const words = name.split(' ').filter((word) => /\p{L}/u.test(word));
   if (words.length < 2) return fail('O campo name deve ter pelo menos duas palavras.');
   return name;
 }
 
-function readPosition(body: Body): Position {
-  const value = body.position;
-  if (value === undefined || value === null) return fail('O campo position é obrigatório.');
-  if (typeof value !== 'string' || !POSITIONS.includes(value as Position)) {
-    return fail('O campo position deve ser GOL, ZAG, LAT, MEI ou ATA.');
-  }
-  return value as Position;
-}
-
 function readBasicData(body: Body): UpdatePlayerInput {
   const name = readName(body);
-  const position = readPosition(body);
+  const position = readChoice(body, 'position', POSITIONS, 'O campo position deve ser GOL, ZAG, LAT, MEI ou ATA.');
   const age = readInt(body, 'age', 16, 45);
   const agility = readInt(body, 'agility', 1, 100);
   if (age >= 35 && agility > 85) fail('Com 35 anos ou mais, a agilidade é no máximo 85.');
@@ -91,10 +73,10 @@ export function parseUpdatePlayer(raw: unknown): UpdatePlayerInput {
 }
 
 export function parseCondition(raw: unknown): PlayerCondition {
-  const value = asObject(raw).condition;
-  if (value === undefined || value === null) return fail('O campo condition é obrigatório.');
-  if (typeof value !== 'string' || !CONDITIONS.includes(value as PlayerCondition)) {
-    return fail('O campo condition deve ser APTO, MAL_CONDICIONADO ou DOENTE.');
-  }
-  return value as PlayerCondition;
+  return readChoice(
+    asObject(raw),
+    'condition',
+    CONDITIONS,
+    'O campo condition deve ser APTO, MAL_CONDICIONADO ou DOENTE.',
+  );
 }

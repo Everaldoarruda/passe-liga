@@ -1,5 +1,5 @@
 import { fail } from './fail';
-import { MAX_ID } from './limits';
+import { isIdText } from './limits';
 
 export type Query = Record<string, unknown>;
 
@@ -14,7 +14,7 @@ export function readParam(query: Query, name: string): string | undefined {
 export function readIdParam(query: Query, name: string): number | undefined {
   const raw = readParam(query, name);
   if (raw === undefined) return undefined;
-  if (!/^[1-9][0-9]*$/.test(raw) || Number(raw) > MAX_ID) {
+  if (!isIdText(raw)) {
     return fail(`O parâmetro ${name} deve ser um inteiro positivo.`);
   }
   return Number(raw);

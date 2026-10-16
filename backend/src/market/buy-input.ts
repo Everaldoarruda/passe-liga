@@ -1,6 +1,5 @@
-import { asObject } from '../common/body';
+import { asObject, readId, readText } from '../common/body';
 import { fail } from '../common/fail';
-import { MAX_ID } from '../common/limits';
 import { parseBrasiliaDate } from '../domain/brasilia-date';
 import { MS_PER_DAY } from '../domain/trade';
 
@@ -14,15 +13,8 @@ export interface BuyInput {
 export function parseBuy(raw: unknown, now: Date): BuyInput {
   const body = asObject(raw);
 
-  const clubId = body.club_id;
-  if (clubId === undefined || clubId === null) return fail('O campo club_id é obrigatório.');
-  if (typeof clubId !== 'number' || !Number.isInteger(clubId) || clubId < 1 || clubId > MAX_ID) {
-    return fail('O campo club_id deve ser um inteiro positivo.');
-  }
-
-  const text = body.loyalty_until;
-  if (text === undefined || text === null) return fail('O campo loyalty_until é obrigatório.');
-  if (typeof text !== 'string') return fail('O campo loyalty_until deve ser um texto.');
+  const clubId = readId(body, 'club_id');
+  const text = readText(body, 'loyalty_until');
   const loyaltyUntil = parseBrasiliaDate(text);
   if (!loyaltyUntil) {
     return fail('O campo loyalty_until deve ser uma data válida no formato AAAA-MM-DDTHH:MM-03:00.');

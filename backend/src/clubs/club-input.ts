@@ -1,6 +1,6 @@
-import { asObject, Body } from '../common/body';
+import { asObject, Body, readCleanText, readText } from '../common/body';
 import { fail } from '../common/fail';
-import { hasControlCharacters, normalizeForComparison, normalizeSpaces } from '../common/text';
+import { normalizeForComparison } from '../common/text';
 
 export interface CreateClubInput {
   name: string;
@@ -8,14 +8,7 @@ export interface CreateClubInput {
 }
 
 function readName(body: Body): string {
-  const raw = body.name;
-  if (raw === undefined || raw === null) return fail('O campo name é obrigatório.');
-  if (typeof raw !== 'string') return fail('O campo name deve ser um texto.');
-  if (hasControlCharacters(raw)) return fail('O campo name não pode ter caracteres de controle.');
-  const name = normalizeSpaces(raw);
-  if (name === '') return fail('O campo name é obrigatório.');
-  const length = [...name].length;
-  if (length < 3 || length > 60) return fail('O campo name deve ter de 3 a 60 caracteres.');
+  const name = readCleanText(body, 'name', 3, 60);
   if (!/^[\p{L} .-]+$/u.test(name)) {
     return fail('O campo name só aceita letras, espaços, hífen e ponto.');
   }
@@ -34,9 +27,7 @@ function appearsInOrder(acronym: string, letters: string): boolean {
 }
 
 function readAcronym(body: Body, name: string): string {
-  const raw = body.acronym;
-  if (raw === undefined || raw === null) return fail('O campo acronym é obrigatório.');
-  if (typeof raw !== 'string') return fail('O campo acronym deve ser um texto.');
+  const raw = readText(body, 'acronym');
   if (!/^[A-Z]{3}$/.test(raw)) {
     return fail('A sigla deve ter exatamente 3 letras de A a Z, maiúsculas e sem acento.');
   }

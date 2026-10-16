@@ -1,5 +1,4 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import type { Prisma } from '@prisma/client';
 import { fromCents } from '../domain/money';
 import { baseValueCents, overall } from '../domain/player-value';
 import { PrismaService } from '../prisma/prisma.service';
