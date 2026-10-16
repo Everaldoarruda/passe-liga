@@ -7,6 +7,8 @@ import { ListPlayersQuery, parseListPlayersQuery } from './list-players-query';
 import { listPlayers } from './player-list';
 import { parseCondition, parseCreatePlayer, parseUpdatePlayer } from './player-input';
 import { toPlayerResponse } from './player.presenter';
+import { lockClub } from '../common/club-lock';
+
 
 function clubFilter(query: ListPlayersQuery): number | null | { not: null } | undefined {
   if (query.clubId !== undefined) return query.clubId;
@@ -101,7 +103,11 @@ export class PlayersService {
     }
     if (current.condicao === condition) return toPlayerResponse(current);
 
-    const row = await this.prisma.jogador.update({ where: { id }, data: { condicao: condition } });
+       const row = await this.prisma.$transaction(async (tx) => {
+      if (current.clubeId !== null) await lockClub(tx, current.clubeId);
+      if (condition === 'DOENTE') await tx.escalacao.deleteMany({ where: { jogadorId: id } });
+      return tx.jogador.update({ where: { id }, data: { condicao: condition } });
+    });
     return toPlayerResponse(row);
   }
 

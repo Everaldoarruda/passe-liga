@@ -1,6 +1,5 @@
 import { NotFoundException } from '@nestjs/common';
-
-const MAX_ID = 2147483647;
+import { MAX_ID } from './limits';
 
 export function parseId(raw: string): number {
   const valid = /^[1-9][0-9]*$/.test(raw) && Number(raw) <= MAX_ID;

@@ -1,8 +1,7 @@
 import { fail } from './fail';
+import { MAX_ID } from './limits';
 
 export type Query = Record<string, unknown>;
-
-const MAX_ID = 2147483647;
 
 // Ausente devolve undefined; presente e vazio (ou repetido) é 400
 export function readParam(query: Query, name: string): string | undefined {

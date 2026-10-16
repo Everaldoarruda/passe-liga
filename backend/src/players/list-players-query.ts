@@ -1,4 +1,5 @@
 import { fail } from '../common/fail';
+import { MAX_ID } from '../common/limits';
 import { hasControlCharacters, normalizeSpaces } from '../common/text';
 import { PlayerCondition } from '../domain/market-value';
 import { Position } from '../domain/player-value';
@@ -28,7 +29,6 @@ export interface ListPlayersQuery {
 
 type Query = Record<string, unknown>;
 
-const MAX_ID = 2147483647;
 const MAX_VALUE_CENTS = 55000;
 
 const SORT_OPTIONS = new Map<string, SortCriterion>([

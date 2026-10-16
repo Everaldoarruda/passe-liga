@@ -21,10 +21,14 @@ model Clube {
   caixa    Decimal  @default(300.00) @db.Decimal(10, 2)
   formacao String?  @db.VarChar(5)
   criadoEm DateTime @default(now()) @map("criado_em")
-  
+
   jogadores Jogador[]
   contratos  Contrato[]
   transacoes Transacao[]
+  escalacoes        Escalacao[]
+  partidasMandante  Partida[]      @relation("PartidaMandante")
+  partidasVisitante Partida[]      @relation("PartidaVisitante")
+  duelosAtaque      DueloPartida[]
 
   @@map("clubes")
 }
@@ -52,6 +56,9 @@ model Jogador {
 
   contratos  Contrato[]
   transacoes Transacao[]
+  escalacao          Escalacao?
+  duelosComoAtacante DueloPartida[] @relation("DueloAtacante")
+  duelosComoDefensor DueloPartida[] @relation("DueloDefensor")
 
   @@map("jogadores")
 }
@@ -87,4 +94,56 @@ model Transacao {
   jogador       Jogador  @relation(fields: [jogadorId], references: [id])
 
   @@map("transacoes")
+}
+model Escalacao {
+  clubeId   Int      @map("clube_id")
+  jogadorId Int      @unique @map("jogador_id")
+  criadoEm  DateTime @default(now()) @map("criado_em")
+  clube     Clube    @relation(fields: [clubeId], references: [id])
+  jogador   Jogador  @relation(fields: [jogadorId], references: [id])
+
+  @@id([clubeId, jogadorId])
+  @@map("escalacoes")
+}
+
+model Partida {
+  id                Int            @id @default(autoincrement())
+  mandanteId        Int            @map("mandante_id")
+  visitanteId       Int            @map("visitante_id")
+  golsMandante      Int            @map("gols_mandante")
+  golsVisitante     Int            @map("gols_visitante")
+  formacaoMandante  String         @map("formacao_mandante") @db.VarChar(5)
+  formacaoVisitante String         @map("formacao_visitante") @db.VarChar(5)
+  jogadaEm          DateTime       @map("jogada_em")
+  mandante          Clube          @relation("PartidaMandante", fields: [mandanteId], references: [id])
+  visitante         Clube          @relation("PartidaVisitante", fields: [visitanteId], references: [id])
+  duelos            DueloPartida[]
+
+  @@map("partidas")
+}
+
+model DueloPartida {
+  id               Int     @id @default(autoincrement())
+  partidaId        Int     @map("partida_id")
+  ordem            Int
+  clubeAtacanteId  Int     @map("clube_atacante_id")
+  atacanteId       Int     @map("atacante_id")
+  defensorId       Int     @map("defensor_id")
+  nomeAtacante     String  @map("nome_atacante") @db.VarChar(100)
+  nomeDefensor     String  @map("nome_defensor") @db.VarChar(100)
+  posicaoAtacante  String  @map("posicao_atacante") @db.VarChar(3)
+  posicaoDefensor  String  @map("posicao_defensor") @db.VarChar(3)
+  condicaoAtacante String  @map("condicao_atacante") @db.VarChar(20)
+  condicaoDefensor String  @map("condicao_defensor") @db.VarChar(20)
+  atributoAtaque   String  @map("atributo_ataque") @db.VarChar(10)
+  atributoDefesa   String  @map("atributo_defesa") @db.VarChar(10)
+  valorAtaque      Int     @map("valor_ataque")
+  valorDefesa      Int     @map("valor_defesa")
+  gol              Boolean
+  partida          Partida @relation(fields: [partidaId], references: [id])
+  clubeAtacante    Clube   @relation(fields: [clubeAtacanteId], references: [id])
+  atacante         Jogador @relation("DueloAtacante", fields: [atacanteId], references: [id])
+  defensor         Jogador @relation("DueloDefensor", fields: [defensorId], references: [id])
+
+  @@map("duelos_partida")
 }

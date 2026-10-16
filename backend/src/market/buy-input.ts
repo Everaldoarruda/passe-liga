@@ -1,9 +1,9 @@
 import { asObject } from '../common/body';
 import { fail } from '../common/fail';
+import { MAX_ID } from '../common/limits';
 import { parseBrasiliaDate } from '../domain/brasilia-date';
 import { MS_PER_DAY } from '../domain/trade';
 
-const MAX_ID = 2147483647;
 const MAX_LOYALTY_DAYS = 1095;
 
 export interface BuyInput {
