@@ -1,9 +1,21 @@
+import { Navigate, Route, Routes } from 'react-router';
+import Layout from './components/Layout';
+import ClubsPage from './pages/ClubsPage';
+import MatchesPage from './pages/MatchesPage';
+import PlayersPage from './pages/PlayersPage';
+import StandingsPage from './pages/StandingsPage';
+
 function App() {
   return (
-    <main className="mx-auto max-w-3xl p-8 text-center">
-      <h1 className="text-4xl font-bold text-brand">Passe</h1>
-      <p className="mt-2 text-gray-600">Gestão da liga, do mercado à classificação.</p>
-    </main>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route path="/" element={<Navigate to="/players" replace />} />
+        <Route path="/players" element={<PlayersPage />} />
+        <Route path="/clubs" element={<ClubsPage />} />
+        <Route path="/matches" element={<MatchesPage />} />
+        <Route path="/standings" element={<StandingsPage />} />
+      </Route>
+    </Routes>
   );
 }
 
