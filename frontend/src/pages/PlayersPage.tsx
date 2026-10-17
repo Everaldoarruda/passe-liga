@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { Link } from 'react-router';
+import { listClubs } from '../api/clubs';
 import { listPlayers } from '../api/players';
-import type { Player, PlayerPage } from '../api/types';
+import type { Club, Player } from '../api/types';
+import AgilityBar from '../components/AgilityBar';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
 import ConditionBadge from '../components/ConditionBadge';
@@ -8,29 +11,67 @@ import DataTable, { type Column } from '../components/DataTable';
 import Field, { inputClass } from '../components/Field';
 import Modal from '../components/Modal';
 import Pagination from '../components/Pagination';
-import { formatMoney } from '../lib/format';
+import { useFetch } from '../hooks/useFetch';
+import { formatMoney, initials } from '../lib/format';
+import { POSITION_NAMES } from '../lib/labels';
 import { notifySuccess } from '../lib/notify';
 
-const columns: Column<Player>[] = [
-  { header: 'Jogador', render: (player) => player.name },
-  { header: 'Posição', render: (player) => <Badge>{player.position}</Badge> },
-  { header: 'Condição', render: (player) => <ConditionBadge condition={player.condition} /> },
-  { header: 'Valor de mercado', align: 'right', render: (player) => formatMoney(player.market_value) },
-];
+function buildColumns(clubsById: Map<number, Club>): Column<Player>[] {
+  return [
+    {
+      header: 'Jogador',
+      render: (player) => (
+        <div className="flex items-center gap-2">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-medium text-gray-600">
+            {initials(player.name)}
+          </span>
+          <div>
+            <p className="font-medium text-gray-900">{player.name}</p>
+            <p className="text-xs text-gray-500">{POSITION_NAMES[player.position]}</p>
+          </div>
+        </div>
+      ),
+    },
+    { header: 'Posição', render: (player) => <Badge>{player.position}</Badge> },
+    { header: 'Overall', align: 'right', render: (player) => <strong>{player.overall}</strong> },
+    { header: 'Agilidade', render: (player) => <AgilityBar agility={player.agility} /> },
+    { header: 'Idade', align: 'right', render: (player) => player.age },
+    { header: 'Condição', render: (player) => <ConditionBadge condition={player.condition} /> },
+    {
+      header: 'Valor base',
+      align: 'right',
+      render: (player) => <span className="text-gray-500">{formatMoney(player.base_value)}</span>,
+    },
+    {
+      header: 'Valor de mercado',
+      align: 'right',
+      render: (player) => <strong>{formatMoney(player.market_value)}</strong>,
+    },
+    { header: 'Clube', render: (player) => <ClubCell club={clubsById.get(player.club_id ?? 0)} /> },
+  ];
+}
+
+function ClubCell({ club }: { club: Club | undefined }) {
+  if (!club) return <Badge>Livre</Badge>;
+  return (
+    <div className="flex items-center gap-2">
+      <Badge>{club.acronym}</Badge>
+      <Link to={`/clubs/${club.id}`} className="text-gray-900 underline">
+        {club.name}
+      </Link>
+    </div>
+  );
+}
 
 function PlayersPage() {
   const [page, setPage] = useState(1);
-  const [result, setResult] = useState<PlayerPage | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const loadPlayers = useCallback(() => listPlayers({ page }), [page]);
+  const { data, loading, error } = useFetch(loadPlayers);
+  const { data: clubs } = useFetch(listClubs);
+  const columns = buildColumns(new Map(clubs?.map((club) => [club.id, club])));
   const [formOpen, setFormOpen] = useState(false);
   const [name, setName] = useState('');
   const [nameError, setNameError] = useState<string>();
-
-  const changePage = (nextPage: number) => {
-    setLoading(true);
-    setPage(nextPage);
-  };
 
   const closeForm = () => {
     setFormOpen(false);
@@ -46,16 +87,6 @@ function PlayersPage() {
     notifySuccess(`Teste: "${name}" seria cadastrado.`);
     closeForm();
   };
-
-  useEffect(() => {
-    listPlayers(page)
-      .then((data) => {
-        setResult(data);
-        setError(null);
-      })
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [page]);
 
   return (
     <div>
@@ -86,20 +117,20 @@ function PlayersPage() {
       <div className="mt-4 rounded-lg border border-gray-200 bg-white">
         <DataTable
           columns={columns}
-          rows={result?.data ?? []}
+          rows={data?.data ?? []}
           rowKey={(player) => player.id}
           loading={loading}
           error={error}
           emptyMessage="Nenhum jogador encontrado."
         />
-        {result && (
+        {data && (
           <Pagination
-            page={result.meta.page}
-            limit={result.meta.limit}
-            totalItems={result.meta.total_items}
-            totalPages={result.meta.total_pages}
+            page={data.meta.page}
+            limit={data.meta.limit}
+            totalItems={data.meta.total_items}
+            totalPages={data.meta.total_pages}
             itemLabel="jogadores"
-            onPageChange={changePage}
+            onPageChange={setPage}
           />
         )}
       </div>

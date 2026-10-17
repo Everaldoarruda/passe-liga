@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDateTime, formatMoney, toApiDateTime } from './format';
+import { formatDateTime, formatMoney, toApiDateTime, initials } from './format';
 describe('formatMoney', () => {
   it('usa 2 casas, vírgula decimal e ponto nos milhares', () => {
     expect(formatMoney(40)).toBe('40,00');
@@ -17,5 +17,12 @@ describe('formatDateTime', () => {
 describe('toApiDateTime', () => {
   it('acrescenta o fuso de Brasília ao valor do campo de data e hora', () => {
     expect(toApiDateTime('2027-03-02T10:15')).toBe('2027-03-02T10:15-03:00');
+  });
+});
+
+describe('initials', () => {
+  it('usa a primeira letra do primeiro e do último nome', () => {
+    expect(initials('André Lacerda')).toBe('AL');
+    expect(initials('Maria da Silva Souza')).toBe('MS');
   });
 });

@@ -1,4 +1,9 @@
-import { api } from './client';
+import { api, toQueryString } from './client';
 import type { PlayerPage } from './types';
 
-export const listPlayers = (page: number) => api.get<PlayerPage>(`/players?page=${page}`);
+export interface PlayerFilters {
+  page: number;
+}
+
+export const listPlayers = (filters: PlayerFilters) =>
+  api.get<PlayerPage>(`/players${toQueryString({ ...filters })}`);

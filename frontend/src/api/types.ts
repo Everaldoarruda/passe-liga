@@ -32,3 +32,11 @@ export interface PlayerPage {
   data: Player[];
   meta: PageMeta;
 }
+export interface Club {
+  id: number;
+  name: string;
+  acronym: string;
+  cash: number;
+  squad_value: number;
+  net_worth: number;
+}
