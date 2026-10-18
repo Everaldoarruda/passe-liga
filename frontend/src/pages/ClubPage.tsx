@@ -1,34 +1,50 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { getClub } from '../api/clubs';
-import type { SquadPlayer } from '../api/types';
+import { sellPlayer } from '../api/market';
+import type { Sale, SquadPlayer } from '../api/types';
 import Badge from '../components/Badge';
+import Button from '../components/Button';
 import ConditionBadge from '../components/ConditionBadge';
+import ConfirmDialog from '../components/ConfirmDialog';
 import DataTable, { type Column } from '../components/DataTable';
+import Modal from '../components/Modal';
 import PlayerName from '../components/PlayerName';
+import ResultList from '../components/ResultList';
 import { useFetch } from '../hooks/useFetch';
+import { useSubmit } from '../hooks/useSubmit';
 import { formatDateTime, formatMoney } from '../lib/format';
 
-const squadColumns: Column<SquadPlayer>[] = [
-  { header: 'Jogador', render: (player) => <PlayerName player={player} /> },
-  { header: 'Posição', render: (player) => <Badge>{player.position}</Badge> },
-  { header: 'Condição', render: (player) => <ConditionBadge condition={player.condition} /> },
-  {
-    header: 'Valor de mercado',
-    align: 'right',
-    render: (player) => <strong>{formatMoney(player.market_value)}</strong>,
-  },
-  {
-    header: 'Fim da fidelidade',
-    render: (player) => (player.contract ? formatDateTime(player.contract.loyalty_until) : '—'),
-  },
-  { header: 'Dias restantes', align: 'right', render: (player) => player.contract?.remaining_days ?? '—' },
-  {
-    header: '% de multa',
-    align: 'right',
-    render: (player) => (player.contract ? `${player.contract.penalty_rate}%` : '—'),
-  },
-];
+function buildSquadColumns(onSell: (player: SquadPlayer) => void): Column<SquadPlayer>[] {
+  return [
+    { header: 'Jogador', render: (player) => <PlayerName player={player} /> },
+    { header: 'Posição', render: (player) => <Badge>{player.position}</Badge> },
+    { header: 'Condição', render: (player) => <ConditionBadge condition={player.condition} /> },
+    {
+      header: 'Valor de mercado',
+      align: 'right',
+      render: (player) => <strong>{formatMoney(player.market_value)}</strong>,
+    },
+    {
+      header: 'Fim da fidelidade',
+      render: (player) => (player.contract ? formatDateTime(player.contract.loyalty_until) : '—'),
+    },
+    { header: 'Dias restantes', align: 'right', render: (player) => player.contract?.remaining_days ?? '—' },
+    {
+      header: '% de multa',
+      align: 'right',
+      render: (player) => (player.contract ? `${player.contract.penalty_rate}%` : '—'),
+    },
+    {
+      header: 'Ações',
+      render: (player) => (
+        <Button className="px-2 py-1 text-xs" onClick={() => onSell(player)}>
+          Vender
+        </Button>
+      ),
+    },
+  ];
+}
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
@@ -42,7 +58,23 @@ function Stat({ label, value }: { label: string; value: number }) {
 function ClubPage() {
   const { id } = useParams();
   const loadClub = useCallback(() => getClub(Number(id)), [id]);
-  const { data: club, loading, error } = useFetch(loadClub);
+  const { data: club, loading, error, reload } = useFetch(loadClub);
+  const [dialog, setDialog] = useState<
+    { type: 'sell'; player: SquadPlayer } | { type: 'sale'; sale: Sale } | null
+  >(null);
+  const { submitting, submit } = useSubmit();
+  const closeDialog = () => setDialog(null);
+  const squadColumns = buildSquadColumns((player) => setDialog({ type: 'sell', player }));
+
+  const handleSell = async (player: SquadPlayer) => {
+    const sale = await submit(
+      () => sellPlayer(player.id),
+      (result) => `${result.player_name} vendido.`,
+    );
+    if (sale === null) return;
+    setDialog({ type: 'sale', sale });
+    reload();
+  };
 
   return (
     <div>
@@ -73,6 +105,44 @@ function ClubPage() {
           emptyMessage="O clube ainda não tem jogadores."
         />
       </div>
+
+      {dialog?.type === 'sell' && (
+        <ConfirmDialog
+          title="Vender jogador"
+          open
+          confirmLabel="Vender"
+          submitting={submitting}
+          onConfirm={() => handleSell(dialog.player)}
+          onClose={closeDialog}
+        >
+          Vender <strong>{dialog.player.name}</strong> pelo valor de mercado atual (
+          {formatMoney(dialog.player.market_value)})?
+        </ConfirmDialog>
+      )}
+
+      {dialog?.type === 'sale' && (
+        <Modal title="Venda realizada" open onClose={closeDialog}>
+          <ResultList
+            items={[
+              { label: 'Jogador', value: dialog.sale.player_name },
+              { label: 'Valor de compra', value: formatMoney(dialog.sale.purchase_value) },
+              { label: 'Valor de venda', value: formatMoney(dialog.sale.value) },
+              { label: 'Dias restantes', value: dialog.sale.remaining_days },
+              {
+                label: 'Multa',
+                value: `${formatMoney(dialog.sale.penalty)} (${dialog.sale.penalty_rate}%)`,
+              },
+              { label: 'Lucro', value: formatMoney(dialog.sale.profit ?? 0) },
+              { label: 'Comissão', value: formatMoney(dialog.sale.fee) },
+              { label: 'Crédito', value: formatMoney(dialog.sale.cash_change) },
+              { label: 'Novo caixa', value: formatMoney(dialog.sale.club_cash) },
+            ]}
+          />
+          <div className="mt-5 flex justify-end">
+            <Button onClick={closeDialog}>Fechar</Button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

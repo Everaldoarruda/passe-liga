@@ -1,5 +1,5 @@
 import { api } from './client';
-import type { Purchase } from './types';
+import type { Purchase, Sale } from './types';
 
 export interface PurchaseInput {
   club_id: number;
@@ -8,3 +8,5 @@ export interface PurchaseInput {
 
 export const buyPlayer = (playerId: number, body: PurchaseInput) =>
   api.post<Purchase>(`/players/${playerId}/buy`, body);
+
+export const sellPlayer = (playerId: number) => api.post<Sale>(`/players/${playerId}/sell`);

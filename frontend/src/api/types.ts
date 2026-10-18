@@ -79,3 +79,10 @@ export interface Purchase extends Transaction {
   };
   club_cash: number;
 }
+export interface Sale extends Transaction {
+  purchase_value: number;
+  remaining_days: number;
+  penalty_rate: number;
+  contract_status: string;
+  club_cash: number;
+}
