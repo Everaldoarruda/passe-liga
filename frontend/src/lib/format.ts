@@ -12,6 +12,10 @@ export const formatDateTime = (isoDate: string): string => dateTime.format(new D
 
 export const toApiDateTime = (localDateTime: string) => `${localDateTime}-03:00`;
 
+// Data e hora de Brasília no formato do campo datetime-local (AAAA-MM-DDTHH:MM)
+export const toBrasiliaInput = (date: Date) =>
+  new Date(date.getTime() - 3 * 60 * 60 * 1000).toISOString().slice(0, 16);
+
 export const initials = (name: string) => {
   const words = name.split(' ');
   const first = words[0][0];

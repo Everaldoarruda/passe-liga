@@ -21,11 +21,11 @@ const FREE_TABS = [
 
 type NumberFilter = 'min_age' | 'max_age' | 'min_value' | 'max_value';
 
-const NUMBER_FILTERS: { key: NumberFilter; label: string; step: string }[] = [
-  { key: 'min_age', label: 'Idade mínima', step: '1' },
-  { key: 'max_age', label: 'Idade máxima', step: '1' },
-  { key: 'min_value', label: 'Valor mínimo', step: '0.01' },
-  { key: 'max_value', label: 'Valor máximo', step: '0.01' },
+const NUMBER_FILTERS: { key: NumberFilter; label: string; min: string; max?: string; step: string }[] = [
+  { key: 'min_age', label: 'Idade mínima', min: '16', max: '45', step: '1' },
+  { key: 'max_age', label: 'Idade máxima', min: '16', max: '45', step: '1' },
+  { key: 'min_value', label: 'Valor mínimo', min: '0', step: '0.01' },
+  { key: 'max_value', label: 'Valor máximo', min: '0', step: '0.01' },
 ];
 
 interface PlayerFiltersBarProps {
@@ -96,12 +96,13 @@ function PlayerFiltersBar({ filters, clubs, onChange }: PlayerFiltersBarProps) {
             ))}
           </select>
         </Field>
-        {NUMBER_FILTERS.map(({ key, label, step }) => (
+        {NUMBER_FILTERS.map(({ key, label, min, max, step }) => (
           <Field key={key} label={label} htmlFor={`filter-${key}`}>
             <input
               id={`filter-${key}`}
               type="number"
-              min="0"
+              min={min}
+              max={max}
               step={step}
               className={inputClass}
               value={filters[key]}

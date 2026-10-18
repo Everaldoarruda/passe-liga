@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from 'react';
 import type { PurchaseInput } from '../api/market';
 import type { Club, Player } from '../api/types';
-import { formatMoney, toApiDateTime } from '../lib/format';
+import { formatMoney, toApiDateTime, toBrasiliaInput } from '../lib/format';
 import { checkRequired } from '../lib/validation';
 import Button from './Button';
 import Field, { inputClass } from './Field';
+
+const DAY = 24 * 60 * 60 * 1000;
 
 interface BuyFormProps {
   player: Player;
@@ -18,10 +20,23 @@ function BuyForm({ player, clubs, submitting, onSubmit, onCancel }: BuyFormProps
   const [clubId, setClubId] = useState('');
   const [loyaltyUntil, setLoyaltyUntil] = useState('');
   const [errors, setErrors] = useState<{ club?: string; loyalty?: string }>({});
+  // Faixa aceita pela API, calculada uma vez ao abrir a janela: depois de agora e em até 1.095 dias
+  const [range] = useState(() => {
+    const now = Date.now();
+    return {
+      min: toBrasiliaInput(new Date(now + 60 * 1000)),
+      max: toBrasiliaInput(new Date(now + 1095 * DAY)),
+    };
+  });
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    const found = { club: checkRequired(clubId), loyalty: checkRequired(loyaltyUntil) };
+    const loyalty =
+      checkRequired(loyaltyUntil) ??
+      (loyaltyUntil < range.min || loyaltyUntil > range.max
+        ? 'Escolha uma data depois de agora e em até 1.095 dias.'
+        : undefined);
+    const found = { club: checkRequired(clubId), loyalty };
     setErrors(found);
     if (found.club || found.loyalty) return;
     onSubmit({ club_id: Number(clubId), loyalty_until: toApiDateTime(loyaltyUntil) });
@@ -51,6 +66,8 @@ function BuyForm({ player, clubs, submitting, onSubmit, onCancel }: BuyFormProps
         <input
           id="buy-loyalty"
           type="datetime-local"
+          min={range.min}
+          max={range.max}
           className={inputClass}
           value={loyaltyUntil}
           onChange={(event) => setLoyaltyUntil(event.target.value)}

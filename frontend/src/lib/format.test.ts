@@ -3,6 +3,7 @@ import {
   formatDateTime,
   formatMoney,
   toApiDateTime,
+  toBrasiliaInput,
   initials,
   formatSignedMoney,
   formatSigned,
@@ -24,6 +25,12 @@ describe('formatDateTime', () => {
 describe('toApiDateTime', () => {
   it('acrescenta o fuso de Brasília ao valor do campo de data e hora', () => {
     expect(toApiDateTime('2027-03-02T10:15')).toBe('2027-03-02T10:15-03:00');
+  });
+});
+
+describe('toBrasiliaInput', () => {
+  it('converte para o horário de Brasília no formato do campo', () => {
+    expect(toBrasiliaInput(new Date('2026-10-18T13:15:40Z'))).toBe('2026-10-18T10:15');
   });
 });
 

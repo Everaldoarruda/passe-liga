@@ -97,6 +97,7 @@ function PlayerForm({ player, submitting, onSubmit, onCancel }: PlayerFormProps)
       <Field label="Nome" htmlFor="player-name" error={errors.name}>
         <input
           id="player-name"
+          maxLength={100}
           className={inputClass}
           value={values.name}
           onChange={(event) => change('name', event.target.value)}
@@ -124,6 +125,9 @@ function PlayerForm({ player, submitting, onSubmit, onCancel }: PlayerFormProps)
           <input
             id="player-agility"
             type="number"
+            min={1}
+            max={100}
+            step={1}
             className={inputClass}
             value={values.agility}
             onChange={(event) => change('agility', event.target.value)}
@@ -133,6 +137,9 @@ function PlayerForm({ player, submitting, onSubmit, onCancel }: PlayerFormProps)
           <input
             id="player-age"
             type="number"
+            min={player?.age ?? 16}
+            max={45}
+            step={1}
             className={inputClass}
             value={values.age}
             onChange={(event) => change('age', event.target.value)}
@@ -146,6 +153,9 @@ function PlayerForm({ player, submitting, onSubmit, onCancel }: PlayerFormProps)
               <input
                 id={`player-${key}`}
                 type="number"
+                min={1}
+                max={99}
+                step={1}
                 className={inputClass}
                 value={values[key]}
                 onChange={(event) => change(key, event.target.value)}

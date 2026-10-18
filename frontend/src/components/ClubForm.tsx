@@ -36,6 +36,7 @@ function ClubForm({ submitting, onSubmit, onCancel }: ClubFormProps) {
       <Field label="Nome" htmlFor="club-name" error={errors.name}>
         <input
           id="club-name"
+          maxLength={60}
           className={inputClass}
           value={values.name}
           onChange={(event) => setValues((current) => ({ ...current, name: event.target.value }))}
