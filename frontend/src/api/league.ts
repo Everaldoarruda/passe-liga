@@ -18,8 +18,7 @@ export interface MatchInput {
 
 export const playMatch = (body: MatchInput) => api.post<MatchDetail>('/matches', body);
 
-export const listMatches = (clubId: string) =>
-  api.get<Match[]>(`/matches${toQueryString({ club_id: clubId })}`);
+export const listMatches = (clubId = '') => api.get<Match[]>(`/matches${toQueryString({ club_id: clubId })}`);
 
 export const getMatch = (id: number) => api.get<MatchDetail>(`/matches/${id}`);
 

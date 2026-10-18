@@ -43,3 +43,10 @@ export const changeCondition = (id: number, condition: Condition) =>
   api.patch<Player>(`/players/${id}/condition`, { condition });
 
 export const deletePlayer = (id: number) => api.delete(`/players/${id}`);
+
+const countPlayers = (free: string) =>
+  api.get<PlayerPage>(`/players${toQueryString({ limit: 1, free })}`).then((page) => page.meta.total_items);
+
+export const countAllPlayers = () => countPlayers('');
+
+export const countFreePlayers = () => countPlayers('true');
