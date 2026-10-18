@@ -3,13 +3,13 @@
 Aplicação web fullstack que simula o mercado de jogadores de uma liga de futebol fictícia: cadastro de jogadores e clubes, compra e venda com contrato de fidelidade, histórico de transações, escalação, partidas e classificação.
 
 - [`backend/`](backend/README.md): API REST em NestJS com Prisma e PostgreSQL (variáveis de ambiente, estrutura, bibliotecas, decisões e diferenciais).
-- `frontend/`: interface em React (em desenvolvimento).
+- [`frontend/`](frontend/README.md): interface em React com Vite e TypeScript (estrutura, bibliotecas, variáveis de ambiente e diferenciais).
 
 ## Pré-requisitos
 
 | Ferramenta | Versão |
 | --- | --- |
-| Node.js (com npm) | 22 LTS |
+| Node.js (com npm) | 22 LTS, versão 22.22 ou mais nova (exigida pelo React Router do frontend) |
 | Docker Engine com Docker Compose | Compose v2 |
 | PostgreSQL | 16 (sobe pelo Docker Compose, não precisa instalar) |
 
@@ -34,6 +34,17 @@ A API fica em **http://localhost:3000** (as rotas usam o prefixo `/api/v1`, como
 
 O `.env` precisa ser copiado antes do `npm ci`, porque a instalação gera o cliente do Prisma e ele lê o `DATABASE_URL` desse arquivo.
 
+Com a API rodando, em **outro terminal**, a partir da raiz do repositório:
+
+```bash
+# 3. Frontend
+cd frontend
+npm ci
+npm run dev
+```
+
+A interface fica em **http://localhost:5173**. Ela usa a API em `http://localhost:3000/api/v1` por padrão; para outro endereço, veja as variáveis de ambiente em [`frontend/README.md`](frontend/README.md).
+
 ## Banco de dados
 
 O banco é criado pelas migrations versionadas em [`backend/prisma/migrations`](backend/prisma/migrations), aplicadas pelo `npx prisma migrate deploy` do passo 2. Ele começa vazio, sem jogadores, clubes, transações nem partidas.
@@ -47,11 +58,10 @@ npx prisma migrate reset --force --skip-generate
 
 A API pode continuar rodando durante a recriação.
 
-Os arquivos de trava das dependências (`backend/package-lock.json`) estão versionados.
+Os arquivos de trava das dependências (`backend/package-lock.json` e `frontend/package-lock.json`) estão versionados.
 
 ## Funcionalidades não implementadas
 
-- **Frontend:** em desenvolvimento.
 - **Docker Compose completo** (diferencial): o Compose sobe só o banco; a API roda pelos comandos acima.
 
 ## Uso de inteligência artificial
@@ -82,3 +92,10 @@ Os arquivos de trava das dependências (`backend/package-lock.json`) estão vers
   - Revisei cada mudança antes do commit e conferi com os testes automatizados e com a API rodando.
   - Descartei a ideia inicial de criar restrições CHECK no banco, porque o barema não as avalia.
   - Preferi um middleware de log a um interceptor, porque o interceptor não registra as requisições recusadas antes do controller.
+
+### Frontend
+
+- **Ferramenta:** Claude Code (Anthropic), extensão do VS Code.
+- **Onde e como:** usei a IA como tutora para aprender React, etapa por etapa: projeto e ferramentas, rotas, camada de API, componentes reutilizáveis, lista de jogadores, formulários, clubes, compra e venda, histórico, escalação, partidas e classificação. Em cada etapa, a IA explicava o conceito e o código; eu escrevia os arquivos e ela revisava (lint, formatação, testes e build), apontando os erros. Em algumas etapas, pedi que ela aplicasse o código e me explicasse cada parte. Também usei a IA para popular o banco de desenvolvimento com dados de teste, por um script local que chama a API e não faz parte do repositório.
+- **Por quê:** eu não conhecia React, e o prazo era curto. O formato de aula me permitiu entender cada parte para conseguir explicá-la.
+- **O que aceitei, alterei ou descartei:** troquei as sugestões iniciais de TanStack Query e de React Hook Form com Zod por soluções mais simples e alinhadas ao enunciado (um hook próprio `useFetch` com `useState` e `useEffect`, e formulários controlados com validação própria), para usar só o que consigo explicar.
