@@ -60,6 +60,34 @@ A API pode continuar rodando durante a recriação.
 
 Os arquivos de trava das dependências (`backend/package-lock.json` e `frontend/package-lock.json`) estão versionados.
 
+## Variáveis de ambiente
+
+Cada parte tem o seu arquivo `.env.example`, com todas as variáveis e valores que funcionam com o banco do Docker Compose:
+
+- **Backend:** [`backend/.env.example`](backend/.env.example) (`DATABASE_URL`, `PORT`, `FRONTEND_ORIGIN` e `TEST_DATABASE_URL`). A descrição de cada uma está em [`backend/README.md`](backend/README.md#variáveis-de-ambiente).
+- **Frontend:** [`frontend/.env.example`](frontend/.env.example) (`VITE_API_URL`, opcional). A descrição está em [`frontend/README.md`](frontend/README.md#variáveis-de-ambiente).
+
+## Estrutura de pastas e bibliotecas
+
+```
+passe-liga/
+├── backend/             # API REST (NestJS, Prisma e PostgreSQL)
+├── frontend/            # interface (React, Vite e TypeScript)
+└── docker-compose.yml   # banco de dados PostgreSQL
+```
+
+A estrutura interna de cada parte e a lista completa das bibliotecas, com o motivo de cada uma, estão em:
+
+- [`backend/README.md`](backend/README.md#estrutura-de-pastas) (estrutura) e [`backend/README.md`](backend/README.md#bibliotecas) (bibliotecas);
+- [`frontend/README.md`](frontend/README.md#estrutura-de-pastas) (estrutura) e [`frontend/README.md`](frontend/README.md#bibliotecas) (bibliotecas).
+
+## Decisões e premissas
+
+As decisões sobre os detalhes que o enunciado não definiu estão separadas por parte:
+
+- **Backend:** [`backend/README.md`](backend/README.md#decisões-e-premissas) (dinheiro em centavos, listagem em memória, concorrência, recompra, nome único do clube, ordem das validações, datas e desempates).
+- **Frontend:** [`frontend/README.md`](frontend/README.md#decisões) (busca de dados, formulários, valores sem recálculo, datas e recusas impedidas na tela).
+
 ## Funcionalidades não implementadas
 
 - **Docker Compose completo** (diferencial): o Compose sobe só o banco; a API roda pelos comandos acima.
