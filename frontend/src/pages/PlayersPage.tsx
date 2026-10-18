@@ -1,23 +1,47 @@
 import { useCallback, useState } from 'react';
 import { Link } from 'react-router';
 import { listClubs } from '../api/clubs';
-import { listPlayers, type PlayerFilters } from '../api/players';
-import type { Club, Player } from '../api/types';
+import {
+  changeCondition,
+  createPlayer,
+  deletePlayer,
+  listPlayers,
+  updatePlayer,
+  type PlayerCreate,
+  type PlayerFilters,
+} from '../api/players';
+import type { Club, Condition, Player } from '../api/types';
 import AgilityBar from '../components/AgilityBar';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
 import ConditionBadge from '../components/ConditionBadge';
+import ConditionForm from '../components/ConditionForm';
+import ConfirmDialog from '../components/ConfirmDialog';
 import DataTable, { type Column } from '../components/DataTable';
-import Field, { inputClass } from '../components/Field';
 import Modal from '../components/Modal';
 import Pagination from '../components/Pagination';
 import PlayerFiltersBar from '../components/PlayerFiltersBar';
+import PlayerForm from '../components/PlayerForm';
 import { useFetch } from '../hooks/useFetch';
+import { useSubmit } from '../hooks/useSubmit';
 import { formatMoney, initials } from '../lib/format';
 import { POSITION_NAMES } from '../lib/labels';
-import { notifySuccess } from '../lib/notify';
 
-function buildColumns(clubsById: Map<number, Club>): Column<Player>[] {
+type Dialog =
+  | { type: 'create' }
+  | { type: 'edit'; player: Player }
+  | { type: 'condition'; player: Player }
+  | { type: 'delete'; player: Player };
+
+interface RowActions {
+  onEdit: (player: Player) => void;
+  onCondition: (player: Player) => void;
+  onDelete: (player: Player) => void;
+}
+
+const smallButton = 'px-2 py-1 text-xs';
+
+function buildColumns(clubsById: Map<number, Club>, actions: RowActions): Column<Player>[] {
   return [
     {
       header: 'Jogador',
@@ -49,6 +73,24 @@ function buildColumns(clubsById: Map<number, Club>): Column<Player>[] {
       render: (player) => <strong>{formatMoney(player.market_value)}</strong>,
     },
     { header: 'Clube', render: (player) => <ClubCell club={clubsById.get(player.club_id ?? 0)} /> },
+    {
+      header: 'Ações',
+      render: (player) => (
+        <div className="flex justify-end gap-1">
+          <Button className={smallButton} onClick={() => actions.onEdit(player)}>
+            Editar
+          </Button>
+          <Button className={smallButton} onClick={() => actions.onCondition(player)}>
+            Condição
+          </Button>
+          {player.club_id === null && (
+            <Button className={smallButton} onClick={() => actions.onDelete(player)}>
+              Excluir
+            </Button>
+          )}
+        </div>
+      ),
+    },
   ];
 }
 
@@ -84,57 +126,75 @@ function PlayersPage() {
     const search = filters.search.trim();
     return listPlayers({ ...filters, search: search.length >= 2 ? search : '' });
   }, [filters]);
-  const { data, loading, error } = useFetch(loadPlayers);
+  const { data, loading, error, reload } = useFetch(loadPlayers);
   const { data: clubs } = useFetch(listClubs);
-  const columns = buildColumns(new Map(clubs?.map((club) => [club.id, club])));
-  const [formOpen, setFormOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [nameError, setNameError] = useState<string>();
+  const [dialog, setDialog] = useState<Dialog | null>(null);
+  const { submitting, submit } = useSubmit();
 
   const changeFilters = (changes: Partial<PlayerFilters>) =>
     setFilters((current) => ({ ...current, ...changes, page: 1 }));
   const changePage = (page: number) => setFilters((current) => ({ ...current, page }));
+  const closeDialog = () => setDialog(null);
 
-  const closeForm = () => {
-    setFormOpen(false);
-    setName('');
-    setNameError(undefined);
+  const finish = (succeeded: boolean) => {
+    if (!succeeded) return;
+    closeDialog();
+    reload();
   };
 
-  const saveForm = () => {
-    if (name.trim().length < 3) {
-      setNameError('O nome deve ter pelo menos 3 caracteres.');
-      return;
-    }
-    notifySuccess(`Teste: "${name}" seria cadastrado.`);
-    closeForm();
-  };
+  const handleCreate = async (values: PlayerCreate) =>
+    finish(
+      await submit(
+        () => createPlayer(values),
+        (player) =>
+          `${player.name} cadastrado: overall ${player.overall}, valor base ${formatMoney(player.base_value)}.`,
+      ),
+    );
+
+  const handleEdit = async (player: Player, values: PlayerCreate) =>
+    finish(
+      await submit(
+        () =>
+          updatePlayer(player.id, {
+            name: values.name,
+            position: values.position,
+            agility: values.agility,
+            age: values.age,
+          }),
+        (updated) => `${updated.name} atualizado.`,
+      ),
+    );
+
+  const handleCondition = async (player: Player, condition: Condition) =>
+    finish(
+      await submit(
+        () => changeCondition(player.id, condition),
+        (updated) => `Condição de ${updated.name} alterada.`,
+      ),
+    );
+
+  const handleDelete = async (player: Player) =>
+    finish(
+      await submit(
+        () => deletePlayer(player.id),
+        () => `${player.name} excluído.`,
+      ),
+    );
+
+  const columns = buildColumns(new Map(clubs?.map((club) => [club.id, club])), {
+    onEdit: (player) => setDialog({ type: 'edit', player }),
+    onCondition: (player) => setDialog({ type: 'condition', player }),
+    onDelete: (player) => setDialog({ type: 'delete', player }),
+  });
 
   return (
     <div>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-brand">Jogadores</h1>
-        <Button variant="primary" onClick={() => setFormOpen(true)}>
+        <Button variant="primary" onClick={() => setDialog({ type: 'create' })}>
           + Novo jogador
         </Button>
       </div>
-
-      <Modal title="Novo jogador" open={formOpen} onClose={closeForm}>
-        <Field label="Nome" htmlFor="player-name" error={nameError}>
-          <input
-            id="player-name"
-            className={inputClass}
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-          />
-        </Field>
-        <div className="mt-5 flex justify-end gap-2">
-          <Button onClick={closeForm}>Cancelar</Button>
-          <Button variant="primary" onClick={saveForm}>
-            Salvar
-          </Button>
-        </div>
-      </Modal>
 
       <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4">
         <PlayerFiltersBar filters={filters} clubs={clubs ?? []} onChange={changeFilters} />
@@ -160,6 +220,46 @@ function PlayersPage() {
           />
         )}
       </div>
+
+      <Modal title="Novo jogador" open={dialog?.type === 'create'} onClose={closeDialog}>
+        <PlayerForm submitting={submitting} onSubmit={handleCreate} onCancel={closeDialog} />
+      </Modal>
+
+      {dialog?.type === 'edit' && (
+        <Modal title={`Editar ${dialog.player.name}`} open onClose={closeDialog}>
+          <PlayerForm
+            player={dialog.player}
+            submitting={submitting}
+            onSubmit={(values) => handleEdit(dialog.player, values)}
+            onCancel={closeDialog}
+          />
+        </Modal>
+      )}
+
+      {dialog?.type === 'condition' && (
+        <Modal title={`Condição de ${dialog.player.name}`} open onClose={closeDialog}>
+          <ConditionForm
+            player={dialog.player}
+            submitting={submitting}
+            onSubmit={(condition) => handleCondition(dialog.player, condition)}
+            onCancel={closeDialog}
+          />
+        </Modal>
+      )}
+
+      {dialog?.type === 'delete' && (
+        <ConfirmDialog
+          title="Excluir jogador"
+          open
+          confirmLabel="Excluir"
+          submitting={submitting}
+          onConfirm={() => handleDelete(dialog.player)}
+          onClose={closeDialog}
+        >
+          Excluir <strong>{dialog.player.name}</strong>? Ele deixa de aparecer na lista, mas as transações
+          antigas continuam no histórico.
+        </ConfirmDialog>
+      )}
     </div>
   );
 }
