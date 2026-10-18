@@ -1,3 +1,4 @@
+import { Plus, ShoppingCart, Users } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { Link } from 'react-router';
 import { listClubs } from '../api/clubs';
@@ -19,6 +20,7 @@ import ConditionForm from '../components/ConditionForm';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataTable, { type Column } from '../components/DataTable';
 import Modal from '../components/Modal';
+import PageHeader from '../components/PageHeader';
 import Pagination from '../components/Pagination';
 import PlayerFiltersBar from '../components/PlayerFiltersBar';
 import PlayerForm from '../components/PlayerForm';
@@ -72,7 +74,7 @@ function buildColumns(clubsById: Map<number, Club>, actions: RowActions): Column
         <div className="flex justify-end gap-1">
           {player.club_id === null && (
             <Button className={smallButton} onClick={() => actions.onBuy(player)}>
-              Comprar
+              <ShoppingCart size={14} aria-hidden="true" /> Comprar
             </Button>
           )}
           <Button className={smallButton} onClick={() => actions.onEdit(player)}>
@@ -198,12 +200,15 @@ function PlayersPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-brand">Jogadores</h1>
+      <PageHeader
+        icon={Users}
+        title="Jogadores"
+        subtitle="Cadastre jogadores, acompanhe os indicadores e compre os que estão livres."
+      >
         <Button variant="primary" onClick={() => setDialog({ type: 'create' })}>
-          + Novo jogador
+          <Plus size={16} aria-hidden="true" /> Novo jogador
         </Button>
-      </div>
+      </PageHeader>
 
       <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4">
         <PlayerFiltersBar filters={filters} clubs={clubs ?? []} onChange={changeFilters} />

@@ -1,3 +1,4 @@
+import { HandCoins } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { getClub } from '../api/clubs';
@@ -42,7 +43,7 @@ function buildSquadColumns(onSell: (player: SquadPlayer) => void): Column<SquadP
       header: 'Ações',
       render: (player) => (
         <Button className="px-2 py-1 text-xs" onClick={() => onSell(player)}>
-          Vender
+          <HandCoins size={14} aria-hidden="true" /> Vender
         </Button>
       ),
     },

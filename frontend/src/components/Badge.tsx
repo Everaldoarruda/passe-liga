@@ -17,7 +17,7 @@ interface BadgeProps {
 function Badge({ tone = 'neutral', children }: BadgeProps) {
   return (
     <span
-      className={`inline-flex items-center rounded border px-1.5 py-0.5 text-xs font-medium ${toneClasses[tone]}`}
+      className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-xs font-medium ${toneClasses[tone]}`}
     >
       {children}
     </span>

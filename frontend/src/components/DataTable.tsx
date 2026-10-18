@@ -1,3 +1,4 @@
+import { Inbox } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 export interface Column<T> {
@@ -26,11 +27,17 @@ function DataTable<T>({ columns, rows, rowKey, loading, error, emptyMessage }: D
           {error}
         </StatusRow>
       );
-    if (rows.length === 0) return <StatusRow colSpan={columns.length}>{emptyMessage}</StatusRow>;
+    if (rows.length === 0)
+      return (
+        <StatusRow colSpan={columns.length}>
+          <Inbox size={28} className="mx-auto mb-2 text-gray-300" aria-hidden="true" />
+          {emptyMessage}
+        </StatusRow>
+      );
     return rows.map((row) => (
       <tr key={rowKey(row)} className="border-b border-gray-100 last:border-0">
         {columns.map((column) => (
-          <td key={column.header} className={`px-3 py-2 ${alignClass(column)}`}>
+          <td key={column.header} className={`whitespace-nowrap px-3 py-2 ${alignClass(column)}`}>
             {column.render(row)}
           </td>
         ))}
@@ -44,7 +51,10 @@ function DataTable<T>({ columns, rows, rowKey, loading, error, emptyMessage }: D
         <thead>
           <tr className="border-b border-gray-200 text-xs text-gray-500">
             {columns.map((column) => (
-              <th key={column.header} className={`px-3 py-2 font-medium ${alignClass(column)}`}>
+              <th
+                key={column.header}
+                className={`whitespace-nowrap px-3 py-2 font-medium ${alignClass(column)}`}
+              >
                 {column.header}
               </th>
             ))}

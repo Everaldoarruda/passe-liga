@@ -1,3 +1,4 @@
+import { Plus, Shield } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { Link } from 'react-router';
 import { createClub, listClubs, type ClubCreate } from '../api/clubs';
@@ -7,6 +8,7 @@ import Button from '../components/Button';
 import ClubForm from '../components/ClubForm';
 import DataTable, { type Column } from '../components/DataTable';
 import Modal from '../components/Modal';
+import PageHeader from '../components/PageHeader';
 import Tabs from '../components/Tabs';
 import { useFetch } from '../hooks/useFetch';
 import { useSubmit } from '../hooks/useSubmit';
@@ -52,12 +54,15 @@ function ClubsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-brand">Clubes</h1>
+      <PageHeader
+        icon={Shield}
+        title="Clubes"
+        subtitle="Cada clube começa com 300,00 em caixa e sem jogadores. A liga aceita no máximo 20 clubes."
+      >
         <Button variant="primary" onClick={() => setFormOpen(true)}>
-          + Novo clube
+          <Plus size={16} aria-hidden="true" /> Novo clube
         </Button>
-      </div>
+      </PageHeader>
 
       <div className="mt-4 rounded-lg border border-gray-200 bg-white">
         <div className="flex flex-wrap items-center gap-2 px-3 pt-3 text-sm text-gray-600">

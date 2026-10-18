@@ -1,7 +1,9 @@
+import { ListOrdered } from 'lucide-react';
 import { Link } from 'react-router';
 import { listStandings } from '../api/league';
 import type { Standing } from '../api/types';
 import DataTable, { type Column } from '../components/DataTable';
+import PageHeader from '../components/PageHeader';
 import { useFetch } from '../hooks/useFetch';
 import { formatSigned } from '../lib/format';
 
@@ -30,7 +32,11 @@ function StandingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-brand">Classificação</h1>
+      <PageHeader
+        icon={ListOrdered}
+        title="Classificação"
+        subtitle="Vitória vale 3 pontos e empate 1. Desempate pelo saldo, pelos gols marcados e pelo nome."
+      />
       <div className="mt-4 rounded-lg border border-gray-200 bg-white">
         <DataTable
           columns={columns}

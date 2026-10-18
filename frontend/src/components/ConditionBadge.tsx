@@ -9,7 +9,12 @@ const conditionTones = {
 } as const;
 
 function ConditionBadge({ condition }: { condition: Condition }) {
-  return <Badge tone={conditionTones[condition]}>{CONDITION_NAMES[condition]}</Badge>;
+  return (
+    <Badge tone={conditionTones[condition]}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
+      {CONDITION_NAMES[condition]}
+    </Badge>
+  );
 }
 
 export default ConditionBadge;

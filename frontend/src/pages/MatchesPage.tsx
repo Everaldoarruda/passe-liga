@@ -1,3 +1,4 @@
+import { Swords } from 'lucide-react';
 import { useState } from 'react';
 import { listClubs } from '../api/clubs';
 import { playMatch, type MatchInput } from '../api/league';
@@ -5,6 +6,7 @@ import type { MatchDetail } from '../api/types';
 import MatchForm from '../components/MatchForm';
 import MatchHistory from '../components/MatchHistory';
 import MatchResult from '../components/MatchResult';
+import PageHeader from '../components/PageHeader';
 import { useFetch } from '../hooks/useFetch';
 import { useSubmit } from '../hooks/useSubmit';
 
@@ -27,7 +29,11 @@ function MatchesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-brand">Partidas</h1>
+      <PageHeader
+        icon={Swords}
+        title="Partidas"
+        subtitle="Escolha o mandante e o visitante; o placar sai dos 6 duelos entre os titulares."
+      />
 
       <div className="mt-4 rounded-lg border border-gray-200 bg-white">
         <h2 className="px-4 pt-4 text-lg font-semibold text-gray-900">Nova partida</h2>
