@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { formatDateTime, formatMoney, toApiDateTime, initials, formatSignedMoney } from './format';
+import {
+  formatDateTime,
+  formatMoney,
+  toApiDateTime,
+  initials,
+  formatSignedMoney,
+  formatSigned,
+} from './format';
 describe('formatMoney', () => {
   it('usa 2 casas, vírgula decimal e ponto nos milhares', () => {
     expect(formatMoney(40)).toBe('40,00');
@@ -30,5 +37,12 @@ describe('formatSignedMoney', () => {
   it('põe + nas entradas e - nas saídas', () => {
     expect(formatSignedMoney(35.7)).toBe('+35,70');
     expect(formatSignedMoney(-38.85)).toBe('-38,85');
+  });
+});
+describe('formatSigned', () => {
+  it('põe + nos positivos e mantém o - dos negativos', () => {
+    expect(formatSigned(2)).toBe('+2');
+    expect(formatSigned(-1)).toBe('-1');
+    expect(formatSigned(0)).toBe('0');
   });
 });

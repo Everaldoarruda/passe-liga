@@ -20,3 +20,5 @@ export const initials = (name: string) => {
 };
 export const formatSignedMoney = (value: number) =>
   value > 0 ? `+${formatMoney(value)}` : formatMoney(value);
+
+export const formatSigned = (value: number) => (value > 0 ? `+${value}` : String(value));

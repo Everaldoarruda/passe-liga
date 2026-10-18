@@ -17,3 +17,16 @@ export const TRANSACTION_TYPE_NAMES = {
   COMPRA: 'Compra',
   VENDA: 'Venda',
 } as const;
+
+export const ATTRIBUTE_NAMES = {
+  shooting: 'Finalização',
+  passing: 'Passe',
+  dribbling: 'Drible',
+  defending: 'Defesa',
+} as const;
+
+export const RESULT_NAMES = {
+  MANDANTE: 'Vitória do mandante',
+  VISITANTE: 'Vitória do visitante',
+  EMPATE: 'Empate',
+} as const;

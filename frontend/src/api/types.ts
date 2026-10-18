@@ -104,3 +104,51 @@ export interface Lineup {
   complete: boolean;
   players: Player[];
 }
+export interface MatchSide {
+  club_id: number;
+  club_name: string;
+  formation: string;
+  goals: number;
+}
+
+export interface Match {
+  id: number;
+  played_at: string;
+  home: MatchSide;
+  away: MatchSide;
+  result: 'MANDANTE' | 'VISITANTE' | 'EMPATE';
+}
+
+export interface DuelPlayer {
+  player_id: number;
+  player_name: string;
+  position: Position;
+  condition: Condition;
+  attribute: 'shooting' | 'passing' | 'dribbling' | 'defending';
+  value: number;
+}
+
+export interface Duel {
+  order: number;
+  attacking_club_id: number;
+  attacker: DuelPlayer;
+  defender: DuelPlayer;
+  goal: boolean;
+}
+
+export interface MatchDetail extends Match {
+  duels: Duel[];
+}
+export interface Standing {
+  position: number;
+  club_id: number;
+  club_name: string;
+  played: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goals_for: number;
+  goals_against: number;
+  goal_difference: number;
+  points: number;
+}
