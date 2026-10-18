@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { Link } from 'react-router';
 import { listClubs } from '../api/clubs';
-import { listPlayers } from '../api/players';
+import { listPlayers, type PlayerFilters } from '../api/players';
 import type { Club, Player } from '../api/types';
 import AgilityBar from '../components/AgilityBar';
 import Badge from '../components/Badge';
@@ -11,6 +11,7 @@ import DataTable, { type Column } from '../components/DataTable';
 import Field, { inputClass } from '../components/Field';
 import Modal from '../components/Modal';
 import Pagination from '../components/Pagination';
+import PlayerFiltersBar from '../components/PlayerFiltersBar';
 import { useFetch } from '../hooks/useFetch';
 import { formatMoney, initials } from '../lib/format';
 import { POSITION_NAMES } from '../lib/labels';
@@ -63,15 +64,36 @@ function ClubCell({ club }: { club: Club | undefined }) {
   );
 }
 
+const INITIAL_FILTERS: PlayerFilters = {
+  page: 1,
+  search: '',
+  position: '',
+  condition: '',
+  free: '',
+  club_id: '',
+  min_age: '',
+  max_age: '',
+  min_value: '',
+  max_value: '',
+  sort: 'name',
+};
+
 function PlayersPage() {
-  const [page, setPage] = useState(1);
-  const loadPlayers = useCallback(() => listPlayers({ page }), [page]);
+  const [filters, setFilters] = useState(INITIAL_FILTERS);
+  const loadPlayers = useCallback(() => {
+    const search = filters.search.trim();
+    return listPlayers({ ...filters, search: search.length >= 2 ? search : '' });
+  }, [filters]);
   const { data, loading, error } = useFetch(loadPlayers);
   const { data: clubs } = useFetch(listClubs);
   const columns = buildColumns(new Map(clubs?.map((club) => [club.id, club])));
   const [formOpen, setFormOpen] = useState(false);
   const [name, setName] = useState('');
   const [nameError, setNameError] = useState<string>();
+
+  const changeFilters = (changes: Partial<PlayerFilters>) =>
+    setFilters((current) => ({ ...current, ...changes, page: 1 }));
+  const changePage = (page: number) => setFilters((current) => ({ ...current, page }));
 
   const closeForm = () => {
     setFormOpen(false);
@@ -114,6 +136,10 @@ function PlayersPage() {
         </div>
       </Modal>
 
+      <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4">
+        <PlayerFiltersBar filters={filters} clubs={clubs ?? []} onChange={changeFilters} />
+      </div>
+
       <div className="mt-4 rounded-lg border border-gray-200 bg-white">
         <DataTable
           columns={columns}
@@ -130,7 +156,7 @@ function PlayersPage() {
             totalItems={data.meta.total_items}
             totalPages={data.meta.total_pages}
             itemLabel="jogadores"
-            onPageChange={setPage}
+            onPageChange={changePage}
           />
         )}
       </div>
