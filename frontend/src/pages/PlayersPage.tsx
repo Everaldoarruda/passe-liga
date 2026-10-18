@@ -10,7 +10,7 @@ import {
   type PlayerCreate,
   type PlayerFilters,
 } from '../api/players';
-import type { Club, Condition, Player } from '../api/types';
+import type { Club, Condition, Player, Purchase } from '../api/types';
 import AgilityBar from '../components/AgilityBar';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
@@ -22,18 +22,24 @@ import Modal from '../components/Modal';
 import Pagination from '../components/Pagination';
 import PlayerFiltersBar from '../components/PlayerFiltersBar';
 import PlayerForm from '../components/PlayerForm';
+import PlayerName from '../components/PlayerName';
 import { useFetch } from '../hooks/useFetch';
 import { useSubmit } from '../hooks/useSubmit';
-import { formatMoney, initials } from '../lib/format';
-import { POSITION_NAMES } from '../lib/labels';
+import { formatMoney, formatDateTime } from '../lib/format';
+import { buyPlayer, type PurchaseInput } from '../api/market';
+import BuyForm from '../components/BuyForm';
+import ResultList from '../components/ResultList';
 
 type Dialog =
   | { type: 'create' }
   | { type: 'edit'; player: Player }
   | { type: 'condition'; player: Player }
-  | { type: 'delete'; player: Player };
+  | { type: 'delete'; player: Player }
+  | { type: 'buy'; player: Player }
+  | { type: 'purchase'; purchase: Purchase };
 
 interface RowActions {
+  onBuy: (player: Player) => void;
   onEdit: (player: Player) => void;
   onCondition: (player: Player) => void;
   onDelete: (player: Player) => void;
@@ -43,20 +49,7 @@ const smallButton = 'px-2 py-1 text-xs';
 
 function buildColumns(clubsById: Map<number, Club>, actions: RowActions): Column<Player>[] {
   return [
-    {
-      header: 'Jogador',
-      render: (player) => (
-        <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-medium text-gray-600">
-            {initials(player.name)}
-          </span>
-          <div>
-            <p className="font-medium text-gray-900">{player.name}</p>
-            <p className="text-xs text-gray-500">{POSITION_NAMES[player.position]}</p>
-          </div>
-        </div>
-      ),
-    },
+    { header: 'Jogador', render: (player) => <PlayerName player={player} /> },
     { header: 'Posição', render: (player) => <Badge>{player.position}</Badge> },
     { header: 'Overall', align: 'right', render: (player) => <strong>{player.overall}</strong> },
     { header: 'Agilidade', render: (player) => <AgilityBar agility={player.agility} /> },
@@ -77,6 +70,11 @@ function buildColumns(clubsById: Map<number, Club>, actions: RowActions): Column
       header: 'Ações',
       render: (player) => (
         <div className="flex justify-end gap-1">
+          {player.club_id === null && (
+            <Button className={smallButton} onClick={() => actions.onBuy(player)}>
+              Comprar
+            </Button>
+          )}
           <Button className={smallButton} onClick={() => actions.onEdit(player)}>
             Editar
           </Button>
@@ -136,8 +134,8 @@ function PlayersPage() {
   const changePage = (page: number) => setFilters((current) => ({ ...current, page }));
   const closeDialog = () => setDialog(null);
 
-  const finish = (succeeded: boolean) => {
-    if (!succeeded) return;
+  const finish = (outcome: unknown) => {
+    if (outcome === null) return;
     closeDialog();
     reload();
   };
@@ -173,6 +171,16 @@ function PlayersPage() {
       ),
     );
 
+  const handleBuy = async (player: Player, values: PurchaseInput) => {
+    const purchase = await submit(
+      () => buyPlayer(player.id, values),
+      (result) => `${result.player_name} comprado.`,
+    );
+    if (purchase === null) return;
+    setDialog({ type: 'purchase', purchase });
+    reload();
+  };
+
   const handleDelete = async (player: Player) =>
     finish(
       await submit(
@@ -182,6 +190,7 @@ function PlayersPage() {
     );
 
   const columns = buildColumns(new Map(clubs?.map((club) => [club.id, club])), {
+    onBuy: (player) => setDialog({ type: 'buy', player }),
     onEdit: (player) => setDialog({ type: 'edit', player }),
     onCondition: (player) => setDialog({ type: 'condition', player }),
     onDelete: (player) => setDialog({ type: 'delete', player }),
@@ -259,6 +268,36 @@ function PlayersPage() {
           Excluir <strong>{dialog.player.name}</strong>? Ele deixa de aparecer na lista, mas as transações
           antigas continuam no histórico.
         </ConfirmDialog>
+      )}
+
+      {dialog?.type === 'buy' && (
+        <Modal title={`Comprar ${dialog.player.name}`} open onClose={closeDialog}>
+          <BuyForm
+            player={dialog.player}
+            clubs={clubs ?? []}
+            submitting={submitting}
+            onSubmit={(values) => handleBuy(dialog.player, values)}
+            onCancel={closeDialog}
+          />
+        </Modal>
+      )}
+
+      {dialog?.type === 'purchase' && (
+        <Modal title="Compra realizada" open onClose={closeDialog}>
+          <ResultList
+            items={[
+              { label: 'Jogador', value: dialog.purchase.player_name },
+              { label: 'Valor', value: formatMoney(dialog.purchase.value) },
+              { label: 'Taxa', value: formatMoney(dialog.purchase.fee) },
+              { label: 'Custo total', value: formatMoney(dialog.purchase.value + dialog.purchase.fee) },
+              { label: 'Fim da fidelidade', value: formatDateTime(dialog.purchase.contract.loyalty_until) },
+              { label: 'Novo caixa', value: formatMoney(dialog.purchase.club_cash) },
+            ]}
+          />
+          <div className="mt-5 flex justify-end">
+            <Button onClick={closeDialog}>Fechar</Button>
+          </div>
+        </Modal>
       )}
     </div>
   );

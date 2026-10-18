@@ -32,6 +32,7 @@ export interface PlayerPage {
   data: Player[];
   meta: PageMeta;
 }
+
 export interface Club {
   id: number;
   name: string;
@@ -39,4 +40,42 @@ export interface Club {
   cash: number;
   squad_value: number;
   net_worth: number;
+}
+
+export interface Contract {
+  purchase_value: number;
+  loyalty_until: string;
+  remaining_days: number;
+  penalty_rate: number;
+}
+
+export interface SquadPlayer extends Player {
+  contract: Contract | null;
+}
+
+export interface ClubDetail extends Club {
+  players: SquadPlayer[];
+}
+
+export interface Transaction {
+  id: number;
+  club_id: number;
+  player_id: number;
+  player_name: string;
+  type: 'COMPRA' | 'VENDA';
+  value: number;
+  fee: number;
+  penalty: number;
+  profit: number | null;
+  cash_change: number;
+  created_at: string;
+}
+
+export interface Purchase extends Transaction {
+  contract: {
+    purchase_value: number;
+    loyalty_until: string;
+    status: string;
+  };
+  club_cash: number;
 }

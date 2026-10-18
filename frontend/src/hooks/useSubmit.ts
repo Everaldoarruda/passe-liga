@@ -10,10 +10,10 @@ export function useSubmit() {
     try {
       const result = await action();
       notifySuccess(successMessage(result));
-      return true;
+      return result;
     } catch (error) {
       notifyError(error);
-      return false;
+      return null;
     } finally {
       setSubmitting(false);
     }
