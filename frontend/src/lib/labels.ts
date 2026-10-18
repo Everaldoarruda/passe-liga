@@ -19,10 +19,12 @@ export const TRANSACTION_TYPE_NAMES = {
 } as const;
 
 export const ATTRIBUTE_NAMES = {
+  pace: 'Velocidade',
   shooting: 'Finalização',
   passing: 'Passe',
   dribbling: 'Drible',
   defending: 'Defesa',
+  physical: 'Físico',
 } as const;
 
 export const RESULT_NAMES = {

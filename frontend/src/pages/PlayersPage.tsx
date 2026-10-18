@@ -1,4 +1,4 @@
-import { Plus, ShoppingCart, Users } from 'lucide-react';
+import { HeartPulse, Pencil, Plus, ShoppingCart, Trash2, Users } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { Link } from 'react-router';
 import { listClubs } from '../api/clubs';
@@ -19,9 +19,11 @@ import ConditionBadge from '../components/ConditionBadge';
 import ConditionForm from '../components/ConditionForm';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataTable, { type Column } from '../components/DataTable';
+import Drawer from '../components/Drawer';
 import Modal from '../components/Modal';
 import PageHeader from '../components/PageHeader';
 import Pagination from '../components/Pagination';
+import PlayerDetails from '../components/PlayerDetails';
 import PlayerFiltersBar from '../components/PlayerFiltersBar';
 import PlayerForm from '../components/PlayerForm';
 import PlayerName from '../components/PlayerName';
@@ -31,9 +33,11 @@ import { formatMoney, formatDateTime } from '../lib/format';
 import { buyPlayer, type PurchaseInput } from '../api/market';
 import BuyForm from '../components/BuyForm';
 import ResultList from '../components/ResultList';
+import RowMenu, { type MenuItem } from '../components/RowMenu';
 
 type Dialog =
   | { type: 'create' }
+  | { type: 'details'; player: Player }
   | { type: 'edit'; player: Player }
   | { type: 'condition'; player: Player }
   | { type: 'delete'; player: Player }
@@ -41,6 +45,7 @@ type Dialog =
   | { type: 'purchase'; purchase: Purchase };
 
 interface RowActions {
+  onDetails: (player: Player) => void;
   onBuy: (player: Player) => void;
   onEdit: (player: Player) => void;
   onCondition: (player: Player) => void;
@@ -49,9 +54,23 @@ interface RowActions {
 
 const smallButton = 'px-2 py-1 text-xs';
 
+function menuItems(player: Player, actions: RowActions): MenuItem[] {
+  const items: MenuItem[] = [
+    { label: 'Editar', icon: Pencil, onSelect: () => actions.onEdit(player) },
+    { label: 'Alterar condição', icon: HeartPulse, onSelect: () => actions.onCondition(player) },
+  ];
+  if (player.club_id === null) {
+    items.push({ label: 'Excluir', icon: Trash2, danger: true, onSelect: () => actions.onDelete(player) });
+  }
+  return items;
+}
+
 function buildColumns(clubsById: Map<number, Club>, actions: RowActions): Column<Player>[] {
   return [
-    { header: 'Jogador', render: (player) => <PlayerName player={player} /> },
+    {
+      header: 'Jogador',
+      render: (player) => <PlayerName player={player} onSelect={() => actions.onDetails(player)} />,
+    },
     { header: 'Posição', render: (player) => <Badge>{player.position}</Badge> },
     { header: 'Overall', align: 'right', render: (player) => <strong>{player.overall}</strong> },
     { header: 'Agilidade', render: (player) => <AgilityBar agility={player.agility} /> },
@@ -70,24 +89,15 @@ function buildColumns(clubsById: Map<number, Club>, actions: RowActions): Column
     { header: 'Clube', render: (player) => <ClubCell club={clubsById.get(player.club_id ?? 0)} /> },
     {
       header: 'Ações',
+      align: 'right',
       render: (player) => (
-        <div className="flex justify-end gap-1">
+        <div className="flex items-center justify-end gap-1">
           {player.club_id === null && (
             <Button className={smallButton} onClick={() => actions.onBuy(player)}>
               <ShoppingCart size={14} aria-hidden="true" /> Comprar
             </Button>
           )}
-          <Button className={smallButton} onClick={() => actions.onEdit(player)}>
-            Editar
-          </Button>
-          <Button className={smallButton} onClick={() => actions.onCondition(player)}>
-            Condição
-          </Button>
-          {player.club_id === null && (
-            <Button className={smallButton} onClick={() => actions.onDelete(player)}>
-              Excluir
-            </Button>
-          )}
+          <RowMenu label={`Ações de ${player.name}`} items={menuItems(player, actions)} />
         </div>
       ),
     },
@@ -191,7 +201,9 @@ function PlayersPage() {
       ),
     );
 
-  const columns = buildColumns(new Map(clubs?.map((club) => [club.id, club])), {
+  const clubsById = new Map(clubs?.map((club) => [club.id, club]));
+  const columns = buildColumns(clubsById, {
+    onDetails: (player) => setDialog({ type: 'details', player }),
     onBuy: (player) => setDialog({ type: 'buy', player }),
     onEdit: (player) => setDialog({ type: 'edit', player }),
     onCondition: (player) => setDialog({ type: 'condition', player }),
@@ -238,6 +250,30 @@ function PlayersPage() {
       <Modal title="Novo jogador" open={dialog?.type === 'create'} onClose={closeDialog}>
         <PlayerForm submitting={submitting} onSubmit={handleCreate} onCancel={closeDialog} />
       </Modal>
+
+      {dialog?.type === 'details' && (
+        <Drawer
+          label={`Detalhes de ${dialog.player.name}`}
+          onClose={closeDialog}
+          footer={
+            <>
+              <Button onClick={() => setDialog({ type: 'edit', player: dialog.player })}>
+                <Pencil size={14} aria-hidden="true" /> Editar
+              </Button>
+              <Button onClick={() => setDialog({ type: 'condition', player: dialog.player })}>
+                <HeartPulse size={14} aria-hidden="true" /> Alterar condição
+              </Button>
+              {dialog.player.club_id === null && (
+                <Button variant="primary" onClick={() => setDialog({ type: 'buy', player: dialog.player })}>
+                  <ShoppingCart size={14} aria-hidden="true" /> Comprar
+                </Button>
+              )}
+            </>
+          }
+        >
+          <PlayerDetails player={dialog.player} club={clubsById.get(dialog.player.club_id ?? 0)} />
+        </Drawer>
+      )}
 
       {dialog?.type === 'edit' && (
         <Modal title={`Editar ${dialog.player.name}`} open onClose={closeDialog}>
