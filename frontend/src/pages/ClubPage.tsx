@@ -16,6 +16,7 @@ import { useSubmit } from '../hooks/useSubmit';
 import { formatDateTime, formatMoney } from '../lib/format';
 import ClubTransactions from '../components/ClubTransactions';
 import Tabs from '../components/Tabs';
+import ClubLineup from '../components/ClubLineup';
 
 function buildSquadColumns(onSell: (player: SquadPlayer) => void): Column<SquadPlayer>[] {
   return [
@@ -50,6 +51,7 @@ function buildSquadColumns(onSell: (player: SquadPlayer) => void): Column<SquadP
 const CLUB_TABS = [
   { value: 'squad', label: 'Elenco' },
   { value: 'history', label: 'Histórico' },
+  { value: 'lineup', label: 'Escalação' },
 ];
 
 function Stat({ label, value }: { label: string; value: number }) {
@@ -115,6 +117,7 @@ function ClubPage() {
           />
         )}
         {tab === 'history' && club && <ClubTransactions clubId={club.id} />}
+        {tab === 'lineup' && club && <ClubLineup clubId={club.id} squad={club.players} />}
       </div>
 
       {dialog?.type === 'sell' && (
