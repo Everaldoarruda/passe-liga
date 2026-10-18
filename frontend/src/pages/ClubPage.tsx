@@ -14,6 +14,8 @@ import ResultList from '../components/ResultList';
 import { useFetch } from '../hooks/useFetch';
 import { useSubmit } from '../hooks/useSubmit';
 import { formatDateTime, formatMoney } from '../lib/format';
+import ClubTransactions from '../components/ClubTransactions';
+import Tabs from '../components/Tabs';
 
 function buildSquadColumns(onSell: (player: SquadPlayer) => void): Column<SquadPlayer>[] {
   return [
@@ -45,6 +47,10 @@ function buildSquadColumns(onSell: (player: SquadPlayer) => void): Column<SquadP
     },
   ];
 }
+const CLUB_TABS = [
+  { value: 'squad', label: 'Elenco' },
+  { value: 'history', label: 'Histórico' },
+];
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
@@ -65,7 +71,7 @@ function ClubPage() {
   const { submitting, submit } = useSubmit();
   const closeDialog = () => setDialog(null);
   const squadColumns = buildSquadColumns((player) => setDialog({ type: 'sell', player }));
-
+  const [tab, setTab] = useState('squad');
   const handleSell = async (player: SquadPlayer) => {
     const sale = await submit(
       () => sellPlayer(player.id),
@@ -94,16 +100,21 @@ function ClubPage() {
         </div>
       )}
 
-      <h2 className="mt-6 text-lg font-semibold text-gray-900">Elenco</h2>
+      <div className="mt-6">
+        <Tabs label="Seções do clube" options={CLUB_TABS} value={tab} onChange={setTab} />
+      </div>
       <div className="mt-2 rounded-lg border border-gray-200 bg-white">
-        <DataTable
-          columns={squadColumns}
-          rows={club?.players ?? []}
-          rowKey={(player) => player.id}
-          loading={loading}
-          error={error}
-          emptyMessage="O clube ainda não tem jogadores."
-        />
+        {tab === 'squad' && (
+          <DataTable
+            columns={squadColumns}
+            rows={club?.players ?? []}
+            rowKey={(player) => player.id}
+            loading={loading}
+            error={error}
+            emptyMessage="O clube ainda não tem jogadores."
+          />
+        )}
+        {tab === 'history' && club && <ClubTransactions clubId={club.id} />}
       </div>
 
       {dialog?.type === 'sell' && (

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDateTime, formatMoney, toApiDateTime, initials } from './format';
+import { formatDateTime, formatMoney, toApiDateTime, initials, formatSignedMoney } from './format';
 describe('formatMoney', () => {
   it('usa 2 casas, vírgula decimal e ponto nos milhares', () => {
     expect(formatMoney(40)).toBe('40,00');
@@ -24,5 +24,11 @@ describe('initials', () => {
   it('usa a primeira letra do primeiro e do último nome', () => {
     expect(initials('André Lacerda')).toBe('AL');
     expect(initials('Maria da Silva Souza')).toBe('MS');
+  });
+});
+describe('formatSignedMoney', () => {
+  it('põe + nas entradas e - nas saídas', () => {
+    expect(formatSignedMoney(35.7)).toBe('+35,70');
+    expect(formatSignedMoney(-38.85)).toBe('-38,85');
   });
 });

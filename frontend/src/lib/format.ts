@@ -18,3 +18,5 @@ export const initials = (name: string) => {
   const last = words.length > 1 ? words[words.length - 1][0] : '';
   return (first + last).toUpperCase();
 };
+export const formatSignedMoney = (value: number) =>
+  value > 0 ? `+${formatMoney(value)}` : formatMoney(value);

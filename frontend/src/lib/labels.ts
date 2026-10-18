@@ -13,3 +13,7 @@ export const CONDITION_NAMES: Record<Condition, string> = {
   MAL_CONDICIONADO: 'Mal condicionado',
   DOENTE: 'Doente',
 };
+export const TRANSACTION_TYPE_NAMES = {
+  COMPRA: 'Compra',
+  VENDA: 'Venda',
+} as const;
