@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { notifyError, notifySuccess } from '../lib/notify';
 
-// Envia uma ação para a API: desabilita o botão durante o envio e mostra o sucesso ou o message da API
 export function useSubmit() {
   const [submitting, setSubmitting] = useState(false);
 

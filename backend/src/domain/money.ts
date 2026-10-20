@@ -1,4 +1,4 @@
-export const MIN_VALUE_CENTS = 100; // 1.00
+export const MIN_VALUE_CENTS = 100;
 
 export function divideRounded(numerator: number, denominator: number): number {
   return Math.floor((2 * numerator + denominator) / (2 * denominator));

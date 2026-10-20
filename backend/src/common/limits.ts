@@ -1,6 +1,5 @@
 export const MAX_ID = 2147483647;
 
-// Id vindo do corpo JSON: inteiro de 1 até MAX_ID
 export const isId = (value: unknown): value is number =>
   typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= MAX_ID;
 

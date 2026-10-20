@@ -2,8 +2,8 @@ import { divideRounded } from './money';
 
 export const MS_PER_DAY = 86_400_000;
 
-const FEE_THRESHOLD_CENTS = 3000; // taxa só acima de 30,00
-const MAX_PENALTY_CENTS = 1000; // teto da multa: 10,00
+const FEE_THRESHOLD_CENTS = 3000;
+const MAX_PENALTY_CENTS = 1000;
 const COMMISSION_BRACKET_CENTS = 1000; // 10% até 10,00 de lucro, 20% no que passar
 
 export function purchaseFeeCents(valueCents: number): number {

@@ -8,7 +8,6 @@ interface DrawerProps {
   children: ReactNode;
 }
 
-// Painel lateral: fecha no X, na tecla Esc ou num clique no fundo escuro
 function Drawer({ label, onClose, footer, children }: DrawerProps) {
   useEffect(() => {
     const closeOnEscape = (event: KeyboardEvent) => {

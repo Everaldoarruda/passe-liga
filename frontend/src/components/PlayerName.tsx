@@ -2,7 +2,6 @@ import type { Player } from '../api/types';
 import { initials } from '../lib/format';
 import { POSITION_NAMES } from '../lib/labels';
 
-// Iniciais, nome e posição por extenso, como na coluna "Jogador" do mockup
 function PlayerName({ player, onSelect }: { player: Player; onSelect?: () => void }) {
   return (
     <div className="flex items-center gap-2">

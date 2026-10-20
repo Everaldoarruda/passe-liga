@@ -23,7 +23,6 @@ export function readText(body: Body, field: string): string {
   return value;
 }
 
-// Texto livre: sem caracteres de controle, espaços normalizados e tamanho entre min e max
 export function readCleanText(body: Body, field: string, min: number, max: number): string {
   const raw = readText(body, field);
   if (hasControlCharacters(raw)) return fail(`O campo ${field} não pode ter caracteres de controle.`);

@@ -8,7 +8,7 @@ const CONDITION_DISCOUNT: Record<PlayerCondition, number> = {
   DOENTE: 300,
 };
 
-const DISCOUNT_CAP = 400; //teto de -40%
+const DISCOUNT_CAP = 400; // teto de -40%
 
 export function conditionDiscount(condition: PlayerCondition, agility: number): number {
   if (condition === 'APTO') return 0;
